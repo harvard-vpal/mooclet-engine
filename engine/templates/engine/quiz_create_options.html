@@ -1,0 +1,17 @@
+<!-- This page will appear after the LTI launch in resource selection mode -->
+<!-- Gives the option to embed a completely custom (qualtrics) url, or insert a placeholder quiz -->
+
+{% extends "engine/base.html" %}
+{% load staticfiles %}
+
+{% block title %}
+Create quiz
+{% endblock title %}
+
+{% block body %}
+
+<p> Option 1: <a href="{% url 'engine:quiz_create_blank' %}"> Default: Create a quiz within Canvas, type in questions and answers.Create blank quiz </a>
+
+<p> Option 2: <a href="{% url 'engine:quiz_create_url' %}"> I've already built a quiz in Qualtrics, I want to enter the URL.</a> </p>
+	
+{% endblock %}

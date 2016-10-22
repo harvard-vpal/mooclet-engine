@@ -1,0 +1,22 @@
+{% extends "engine/base_mooclet.html" %}
+{% load staticfiles %}
+{% load django_bootstrap_breadcrumbs %}
+
+{% block title %}
+Edit explanation
+{% endblock title %}
+
+{% block breadcrumbs %}
+	{{ block.super }}
+	{% breadcrumb "Modify Explanation" "" %}
+{% endblock breadcrumbs %}
+
+{% block body %}
+
+<form method="post">
+	{{explanation_form.as_p}}
+    <input type="submit" value="Save" />
+</form>
+
+{% endblock %}
+
