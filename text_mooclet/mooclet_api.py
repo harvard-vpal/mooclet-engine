@@ -1,65 +1,47 @@
 import requests
 from django.conf import settings
 
+class MoocletEngineModel:
+    prefix = ''
 
-def url_base(prefix):
-    r = "{}/{}".format(settings.MOOCLET_URL_BASE, prefix)
-
-
-class Mooclet:
-
-    prefix = 'mooclets'
-    url_base = "{}/{}".format(settings.MOOCLET_URL_BASE, prefix)
-
-    @staticmethod
-    def create(**kwargs):
-        '''
-        create mooclet
-        arguments: name, policy
-        '''
-        r = requests.post(Mooclet.url_base, data=kwargs)
+    @classmethod
+    def create(self, **kwargs):
+        r = requests.post("{}/{}".format(settings.MOOCLET_URL_BASE, self.prefix), data=kwargs)
         return r.json()
 
-    @staticmethod
-    def get(mooclet_id):
-        '''
-        get mooclet data
-        '''
-        r = requests.get("{}/{}".format(Mooclet.url_base, mooclet_id))
+    @classmethod
+    def get(self, pk):
+        r = requests.get("{}/{}/{}".format(settings.MOOCLET_URL_BASE, self.prefix, pk))
         return r.json()
 
-    def modify():
+    @classmethod
+    def modify(self):
         pass
 
-    def get_version(**kwargs):
+
+class Mooclet(MoocletEngineModel):
+
+    prefix = 'mooclets'
+
+    # define additional api method for mooclet
+
+    @classmethod
+    def get_version(self, pk, **kwargs):
         '''
         use policy to get version for this mooclet
         arguments: 
         '''
-        r = requests.get("{}/{}".format(Mooclet.url_base, mooclet_id))
+        r = requests.get("{}/{}/{}/{}".format(settings.MOOCLET_URL_BASE, self.prefix, pk, 'get_version'))
         return r.json()
 
 
-class Version:
+class Version(MoocletEngineModel):
+    prefix = 'versions'
 
-    prefix = 'version'
-    url_base = "{}/{}".format(settings.MOOCLET_URL_BASE, prefix)
+class Variable(MoocletEngineModel):
+    prefix = 'variables'
 
-    def get(version_id):
-        '''
-        get version data
-        '''
-        r = requests.get("{}/{}".format(Version.url_base, version_id))
-        return r.json()
+class Value(MoocletEngineModel):
+    prefix = 'values'
 
-    @staticmethod
-    def create(**kwargs):
-        '''
-        create version
-        arguments: mooclet, name
-        '''
-        r = requests.post(Version.url_base, data=kwargs)
-        return r.json()
 
-    def modify():
-        pass

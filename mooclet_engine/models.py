@@ -1,28 +1,33 @@
 from __future__ import unicode_literals
 from django.db import models
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 # from django.contrib.contenttypes.models import ContentType
 # from django.contrib.contenttypes.fields import GenericForeignKey
 import policies
+from django.http import Http404
 
-
+# class User(models.Model):
+#     pass
+    
 class Mooclet(models.Model):
     name = models.CharField(max_length=100,default='')
-
     policy = models.ForeignKey('Policy',blank=True,null=True)
 
     def __unicode__(self):
         return "Mooclet {}: {}".format(self.pk, self.name)
 
-    def get_version(self, policy=None, context={}):
+    def run(self, policy=None, context={}):
         context['mooclet'] = self
+        if not self.version_set.exists():
+            raise Http404('mooclet has no versions')
         if not policy:
             if self.policy:
                 policy = self.policy
             else:
-                raise Exception('no policy found')
+                # print 'no policy found'
+                raise Http404('no policy found')
 
         version = policy.run_policy(context)
 
@@ -33,8 +38,8 @@ class Version(models.Model):
     '''
     Mooclet version
     '''
-    mooclet = models.ForeignKey(Mooclet, null=True)
     name = models.CharField(max_length=200,default='')
+    mooclet = models.ForeignKey(Mooclet, null=True)
 
     def __unicode__(self):
         return "Version {}: {}".format(self.pk, self.name)
@@ -46,19 +51,9 @@ class Version(models.Model):
 
 class Variable(models.Model):
     name = models.CharField(max_length=100)
-    display_name = models.CharField(max_length=200,default='')
-    # is_user_variable = models.BooleanField(default=False)
-    description = models.TextField(default='')
-
-
-    # user = models.BooleanField()
-    # mooclet = models.BooleanField()
-    # version = models.BooleanField()
-    # policy = models.BooleanField()
-
 
     def __unicode__(self):
-        return self.display_name or self.name
+        return self.name
 
     def get_data(self,context=None):
         '''
@@ -81,7 +76,7 @@ class Variable(models.Model):
         #     return self.value_set.filter(**query)
         # else:
         #     return self.value_set.all()
-
+        
         return self.value_set.all()
 
 
@@ -103,7 +98,7 @@ class Value(models.Model):
     '''
     variable = models.ForeignKey(Variable)
 
-    user = models.ForeignKey(User,null=True,blank=True)
+    user = models.PositiveIntegerField(null=True,blank=True)
     mooclet = models.ForeignKey(Mooclet,null=True,blank=True)
     version = models.ForeignKey(Version,null=True,blank=True)
     policy = models.ForeignKey('Policy',null=True,blank=True)
@@ -143,4 +138,6 @@ class Policy(models.Model):
         variables = self.get_variables()
         version_id = policy_function(variables,context)
         return version_id
+
+
 

@@ -9,7 +9,7 @@ class MoocletSerializer(serializers.ModelSerializer):
 class VersionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Version
-        fields = ('id','mooclet','name')
+        fields = ('id','name','mooclet')
 
 class PolicySerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,4 +25,7 @@ class ValueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Value
         fields = ('id','variable','user','mooclet','version','policy','value','text','timestamp')
-        
+
+# class UserSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User

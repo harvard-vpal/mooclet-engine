@@ -13,8 +13,9 @@ class MoocletViewSet(viewsets.ModelViewSet):
     	return Response({'test':'hi'})
 
     @detail_route()
-    def get_version(self, request, pk=None):
-    	version = self.get_version()
+    def run(self, request, pk=None):
+        policy = request.GET.get('policy',None)
+    	version = self.get_object().run()
     	return Response(VersionSerializer(version).data)
 
 class VersionViewSet(viewsets.ModelViewSet):
@@ -28,3 +29,11 @@ class VariableViewSet(viewsets.ModelViewSet):
 class ValueViewSet(viewsets.ModelViewSet):
 	queryset = Value.objects.all()
 	serializer_class = ValueSerializer
+
+class PolicyViewSet(viewsets.ModelViewSet):
+    queryset = Policy.objects.all()
+    serializer_class = PolicySerializer
+
+# class UserViewSet(viewsets.ModelViewSet):
+#     queryset = User.objects.all()
+#     serializer_class = UserSerializer

@@ -1,8 +1,8 @@
 from numpy.random import choice, beta
 from django.core.urlresolvers import reverse
-# from django.apps import apps
+from django.apps import apps
 # from django.contrib.contenttypes.models import ContentType
-# from django.db.models import Avg
+from django.db.models import Avg
 
 # arguments to policies:
 
@@ -25,12 +25,12 @@ def thompson_sampling_placeholder(variables,context):
 	return choice(context['mooclet'].version_set.all())
 
 def thompson_sampling(variables,context):
-	versions = context['versions']
+	versions = context['mooclet'].version_set.all()
 	#import models individually to avoid circular dependency
-	Variable = apps.get_model('engine', 'Variable')
-	Value = apps.get_model('engine', 'Value')
-	Version = apps.get_model('engine', 'Version')
-	version_content_type = ContentType.objects.get_for_model(Version)
+	Variable = apps.get_model('mooclet_engine', 'Variable')
+	Value = apps.get_model('mooclet_engine', 'Value')
+	Version = apps.get_model('mooclet_engine', 'Version')
+	# version_content_type = ContentType.objects.get_for_model(Version)
 	#priors we set by hand - will use instructor rating and confidence in future
 	prior_success = 19
 	prior_failure = 1
@@ -51,25 +51,25 @@ def thompson_sampling(variables,context):
 
 		#get instructor conf and use for priors later
 		#add priors to db
-		prior_success_db, created = Variable.objects.get_or_create(name='thompson_prior_success', content_type=version_content_type)
-		prior_success_db_value = Value.objects.filter(variable=prior_success_db, object_id=version.id).last()
+		prior_success_db, created = Variable.objects.get_or_create(name='thompson_prior_success')
+		prior_success_db_value = Value.objects.filter(variable=prior_success_db, version=version).last()
 		if prior_success_db_value:
 			#there is already a value, so update it
 			prior_success_db_value.value = prior_success
 			prior_success_db_value.save()
 		else:
 			#no db value
-			prior_success_db_value = Value.objects.create(variable=prior_success_db, object_id=version.id, value=prior_success)
+			prior_success_db_value = Value.objects.create(variable=prior_success_db, version=version, value=prior_success)
 
-		prior_failure_db, created = Variable.objects.get_or_create(name='thompson_prior_failure', content_type=version_content_type)
-		prior_failure_db_value = Value.objects.filter(variable=prior_failure_db, object_id=version.id).last()
+		prior_failure_db, created = Variable.objects.get_or_create(name='thompson_prior_failure')
+		prior_failure_db_value = Value.objects.filter(variable=prior_failure_db, version=version).last()
 		if prior_failure_db_value:
 			#there is already a value, so update it
 			prior_failure_db_value.value = prior_failure
 			prior_failure_db_value.save()
 		else:
 			#no db value
-			prior_failure_db_value = Value.objects.create(variable=prior_failure_db, object_id=version.id, value=prior_failure)
+			prior_failure_db_value = Value.objects.create(variable=prior_failure_db, version=version, value=prior_failure)
 	
 
 		#TODO - log to db later?

@@ -54,14 +54,14 @@ INSTALLED_APPS = (
     ## external apps
     'storages',
     'rest_framework',
-    'rest_framework.authtoken',
+    # 'rest_framework.authtoken',
     # 'ordered_model',
     # 'bootstrap3',
     # 'django_bootstrap_breadcrumbs',
     # 'crispy_forms',
 
     ## core functions
-    'mooclet',
+    'mooclet_engine',
     'text_mooclet',
 
 )
@@ -142,7 +142,7 @@ USE_TZ = True
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-SESSION_COOKIE_SECURE = True
+# SESSION_COOKIE_SECURE = True
 
 SECURE_SSL_REDIRECT = True
 

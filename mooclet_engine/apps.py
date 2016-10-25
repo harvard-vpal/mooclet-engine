@@ -4,4 +4,4 @@ from django.apps import AppConfig
 
 
 class MoocletConfig(AppConfig):
-    name = 'mooclet'
+    name = 'mooclet_engine'
