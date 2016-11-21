@@ -1,24 +1,7 @@
-Django>=1.9
-requests
+# install base requirements
+-r requirements_base.txt
+
+# additional deployment requirements
 psycopg2
-numpy>=1.10
-django-ordered-model
-djangorestframework
 django-storages
 boto
-django-bootstrap3
-django-bootstrap-breadcrumbs
-#django-crispy-forms
-
-#django-cached-authentication-middleware>=0.2.0
-
-## install LTI libraries from icommons github repos
-ims-lti-py
-#git+git://github.com/Harvard-University-iCommons/django-auth-lti.#git@v1.2.5#egg=django-auth-lti==1.2.5
-
-
-
-## alternate config that installs LTI libraries from DCE github repos
-git+git://github.com/harvard-dce/django-auth-lti.git@dce-lti-py
-#git+git://github.com/harvard-dce/dce_lti_py.git@v0.7.4
-dce-lti-py

@@ -1,16 +1,11 @@
 from __future__ import unicode_literals
 from django.db import models
-# from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
-# from django.contrib.contenttypes.models import ContentType
-# from django.contrib.contenttypes.fields import GenericForeignKey
 import policies
 from django.http import Http404
 
-# class User(models.Model):
-#     pass
-    
+
 class Mooclet(models.Model):
     name = models.CharField(max_length=100,default='')
     policy = models.ForeignKey('Policy',blank=True,null=True)
@@ -59,24 +54,6 @@ class Variable(models.Model):
         '''
         return relevant value objects for the variable type
         '''
-        # context is a dictionary that contains model objects user, course, quiz, mooclet, version
-        # if context:
-        #     related_object = self.object_name # str: 'course','user','mooclet', or 'version'
-
-        #     query = {}
-        #     # if user variable and user info in context, filter by user
-        #     if 'user' in context and self.is_user_variable:
-        #         query['user'] = context['user']
-
-        #     # if context is at the mooclet-level but variable is version-related, pass related version ids to the query
-        #     if 'mooclet' in context and related_object=='version':
-        #         query['object_id__in'] = context['mooclet'].version_set.values_list('id',flat=True)
-        #     else:
-        #         query['object_id'] = context[related_object].id # pk of related content object instance
-        #     return self.value_set.filter(**query)
-        # else:
-        #     return self.value_set.all()
-        
         return self.value_set.all()
 
 
