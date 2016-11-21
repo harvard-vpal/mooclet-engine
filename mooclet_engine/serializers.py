@@ -19,7 +19,7 @@ class PolicySerializer(serializers.ModelSerializer):
 class VariableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Variable
-        # fields = ('id','name','display_name','description')
+        fields = ('id','name')
 
 class ValueSerializer(serializers.ModelSerializer):
     class Meta:
