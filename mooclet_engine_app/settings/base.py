@@ -54,6 +54,7 @@ INSTALLED_APPS = (
 
     ## external apps
     'storages',
+    'corsheaders',
     'rest_framework',
     # 'rest_framework.authtoken',
     # 'ordered_model',
@@ -69,6 +70,7 @@ INSTALLED_APPS = (
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
@@ -163,6 +165,14 @@ REST_FRAMEWORK = {
         # 'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ]
 }
+
+#### cors headers ####
+
+# allow post requests from edx
+CORS_ORIGIN_ALLOW_ALL = True
+
+
+#### custom application settings ####
 
 # set envrionment-specific api url for mooclet engine, from secure.py
 MOOCLET_URL_BASE = secure.MOOCLET_URL_BASE[os.environ['ENV_TYPE']]
