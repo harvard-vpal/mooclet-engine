@@ -168,7 +168,7 @@ REST_FRAMEWORK = {
 
 #### cors headers ####
 
-# allow post requests from edx
+# allow cross origin requests
 CORS_ORIGIN_ALLOW_ALL = True
 
 
