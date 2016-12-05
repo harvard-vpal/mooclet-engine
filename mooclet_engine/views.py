@@ -10,25 +10,26 @@ class MoocletViewSet(viewsets.ModelViewSet):
 
     @detail_route()
     def test(self, request, pk=None):
-    	return Response({'test':'hi'})
+        return Response({'test':'hi'})
 
     @detail_route()
     def run(self, request, pk=None):
         policy = request.GET.get('policy',None)
-    	version = self.get_object().run()
-    	return Response(VersionSerializer(version).data)
+        version = self.get_object().run()
+        return Response(VersionSerializer(version).data)
 
 class VersionViewSet(viewsets.ModelViewSet):
-	queryset = Version.objects.all()
-	serializer_class = VersionSerializer
+    queryset = Version.objects.all()
+    serializer_class = VersionSerializer
 
 class VariableViewSet(viewsets.ModelViewSet):
-	queryset = Variable.objects.all()
-	serializer_class = VariableSerializer
+    queryset = Variable.objects.all()
+    serializer_class = VariableSerializer
 
 class ValueViewSet(viewsets.ModelViewSet):
-	queryset = Value.objects.all()
-	serializer_class = ValueSerializer
+    queryset = Value.objects.all()
+    serializer_class = ValueSerializer
+    filter_fields = ('user',)
 
 class PolicyViewSet(viewsets.ModelViewSet):
     queryset = Policy.objects.all()
