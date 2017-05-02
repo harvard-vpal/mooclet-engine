@@ -45,6 +45,9 @@ class Version(models.Model):
 # class MoocletPolicyState(models.Model):
 # 	pass
 
+class Learner(models.Model):
+    name = models.CharField(max_length=100)
+
 
 class Variable(models.Model):
     name = models.CharField(max_length=100)
@@ -77,7 +80,7 @@ class Value(models.Model):
     '''
     variable = models.ForeignKey(Variable)
 
-    user = models.PositiveIntegerField(null=True,blank=True)
+    learner = models.ForeignKey(Learner,null=True,blank=True)
     mooclet = models.ForeignKey(Mooclet,null=True,blank=True)
     version = models.ForeignKey(Version,null=True,blank=True)
     policy = models.ForeignKey('Policy',null=True,blank=True)
