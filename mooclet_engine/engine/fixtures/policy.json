@@ -1,13 +1,13 @@
 [
   {
-    "model": "mooclet_engine.policy",
+    "model": "engine.policy",
     "pk": 1,
     "fields": {
       "name": "uniform_random"
     }
   },
   {
-    "model": "mooclet_engine.policy",
+    "model": "engine.policy",
     "pk": 2,
     "fields": {
       "name": "weighted_random"
@@ -15,7 +15,7 @@
   },
 
   {
-    "model": "mooclet_engine.policy",
+    "model": "engine.policy",
     "pk": 3,
     "fields": {
       "name": "thompson_sampling"

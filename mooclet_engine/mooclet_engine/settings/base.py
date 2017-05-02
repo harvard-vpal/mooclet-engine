@@ -15,7 +15,9 @@ from django.core.urlresolvers import reverse_lazy
 from sys import path
 import secure
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+# BASE DIR refers to the directory containing manage.py
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Absolute filesystem path to the Django project config directory:
 # (this is the parent of the directory where this file resides,
@@ -63,8 +65,8 @@ INSTALLED_APPS = (
     # 'crispy_forms',
 
     ## internal apps
-    'mooclet_engine',
-    'text_mooclet',
+    'engine',
+    # 'text_mooclet',
 
 )
 
@@ -106,9 +108,9 @@ TEMPLATES = [{
     },
 },]
 
-ROOT_URLCONF = 'mooclet_engine_app.urls'
+ROOT_URLCONF = 'mooclet_engine.urls'
 
-WSGI_APPLICATION = 'mooclet_engine_app.wsgi.application'
+WSGI_APPLICATION = 'mooclet_engine.wsgi.application'
 
 
 # Database
@@ -178,5 +180,5 @@ CORS_ORIGIN_ALLOW_ALL = True
 #### custom application settings ####
 
 # set envrionment-specific api url for mooclet engine, from secure.py
-MOOCLET_URL_BASE = secure.MOOCLET_URL_BASE[os.environ['ENV_TYPE']]
+# MOOCLET_URL_BASE = secure.MOOCLET_URL_BASE[os.environ['ENV_TYPE']]
 

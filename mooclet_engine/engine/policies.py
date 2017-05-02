@@ -27,9 +27,9 @@ def thompson_sampling_placeholder(variables,context):
 def thompson_sampling(variables,context):
 	versions = context['mooclet'].version_set.all()
 	#import models individually to avoid circular dependency
-	Variable = apps.get_model('mooclet_engine', 'Variable')
-	Value = apps.get_model('mooclet_engine', 'Value')
-	Version = apps.get_model('mooclet_engine', 'Version')
+	Variable = apps.get_model('engine', 'Variable')
+	Value = apps.get_model('engine', 'Value')
+	Version = apps.get_model('engine', 'Version')
 	# version_content_type = ContentType.objects.get_for_model(Version)
 	#priors we set by hand - will use instructor rating and confidence in future
 	prior_success = 19
