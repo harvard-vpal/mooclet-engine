@@ -33,8 +33,10 @@ class Version(models.Model):
     '''
     Mooclet version
     '''
-    name = models.CharField(max_length=200,default='')
+
     mooclet = models.ForeignKey(Mooclet, null=True)
+    name = models.CharField(max_length=200,default='')
+    text = models.TextField(blank=True,default='')
 
     def __unicode__(self):
         return "Version {}: {}".format(self.pk, self.name)

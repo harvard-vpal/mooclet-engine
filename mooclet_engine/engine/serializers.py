@@ -9,7 +9,7 @@ class MoocletSerializer(serializers.ModelSerializer):
 class VersionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Version
-        fields = ('id','name','mooclet')
+        fields = ('id','mooclet','name','text')
 
 class PolicySerializer(serializers.ModelSerializer):
     class Meta:
