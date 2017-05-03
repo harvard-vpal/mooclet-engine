@@ -4,6 +4,7 @@ from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 
 # rest framework viewsets
+
 class MoocletViewSet(viewsets.ModelViewSet):
     queryset = Mooclet.objects.all()
     serializer_class = MoocletSerializer

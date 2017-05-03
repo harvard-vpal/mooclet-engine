@@ -6,12 +6,24 @@ import policies
 from django.http import Http404
 
 
+class Environment(models.Model):
+    name = models.CharField(max_length=200,default='')
+
+    def __unicode__(self):
+        return "{} {}: {}".format(self.__class__.__name__, self.pk, self.name)
+
+
 class Mooclet(models.Model):
     name = models.CharField(max_length=100,default='')
     policy = models.ForeignKey('Policy',blank=True,null=True)
+    environment = models.ForeignKey(Environment)
+    mooclet_id = models.PositiveIntegerField(blank=True)
+
+    class Meta:
+        unique_together = ('environment','mooclet_id')
 
     def __unicode__(self):
-        return "Mooclet {}: {}".format(self.pk, self.name)
+        return "{}: {}".format(self.__class__.__name__, self.name)
 
     def run(self, policy=None, context={}):
         context['mooclet'] = self
@@ -33,27 +45,44 @@ class Version(models.Model):
     '''
     Mooclet version
     '''
-
-    mooclet = models.ForeignKey(Mooclet, null=True)
+    
     name = models.CharField(max_length=200,default='')
+    mooclet = models.ForeignKey(Mooclet)
     text = models.TextField(blank=True,default='')
+    version_id = models.PositiveIntegerField(blank=True)
+    # mooclet_version_id = models.PositiveIntegerField(blank=True)
+
+    # @property
+    # def environment(self):
+    #     return self.mooclet.environment.pk
+
+    # class Meta:
+    #     unique_together = ('environment','version_id')
 
     def __unicode__(self):
-        return "Version {}: {}".format(self.pk, self.name)
+        return "{} {}: {}".format(self.__class__.__name__, self.pk, self.name)
 
 
 # class MoocletPolicyState(models.Model):
 # 	pass
 
+
 class Learner(models.Model):
     name = models.CharField(max_length=100)
+    environment = models.ForeignKey(Environment)
+    learner_id = models.PositiveIntegerField(blank=True)
+
+    class Meta:
+        unique_together = ('environment','learner_id')
 
 
 class Variable(models.Model):
     name = models.CharField(max_length=100)
+    environment = models.ForeignKey(Environment)
+    variable_id = models.PositiveIntegerField(blank=True)
 
     def __unicode__(self):
-        return self.name
+        return "{} {}: {}".format(self.__class__.__name__, self.pk, self.name)
 
     def get_data(self,context=None):
         '''
@@ -89,14 +118,25 @@ class Value(models.Model):
     text = models.TextField(blank=True,default='')
     timestamp = models.DateTimeField(null=True,auto_now=True)
 
+    # value_id = models.PositiveIntegerField(blank=True)
+
+    # class Meta:
+    #     unique_together = ('environment','value_id')
+
+    # @property
+    # def environment(self):
+    #     return self.variable.environment
 
 
 class Policy(models.Model):
     name = models.CharField(max_length=100)
+    environment = models.ForeignKey(Environment,null=True,blank=True,default=None)
+    policy_id = models.PositiveIntegerField(blank=True)
     # variables = models.ManyToManyField('Variable') # might use this for persistent "state variables"?
 
     class Meta:
         verbose_name_plural = 'policies'
+        unique_together = ('environment','policy_id')
 
     def __unicode__(self):
         return self.name
