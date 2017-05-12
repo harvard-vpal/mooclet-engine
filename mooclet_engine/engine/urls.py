@@ -11,5 +11,5 @@ router.register(r'policy', views.PolicyViewSet)
 # router.register(r'user', views.UserViewSet)
 
 urlpatterns = [
-	url(r'^api/', include(router.urls, namespace='api')),
+	url(r'^api/v1/', include(router.urls, namespace='api')),
 ]
