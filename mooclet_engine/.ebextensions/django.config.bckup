@@ -23,14 +23,20 @@ packages:
     zlib-devel: []
 
 container_commands:
-  01_migrate:
+  01_static:
+    command: "django-admin.py collectstatic --noinput"
+    leader_only: true
+  02_migrate:
     command: "django-admin.py migrate"
     leader_only: true
-  02_loaddata:
+  02a_migrate_celery:
+    command: "django-admin.py migrate django_celery_results"
+    leader_only: true
+  03_loaddata:
     command: "django-admin.py loaddata policy"
     leader_only: true
-  04_pip_upgrade:
+  pip_upgrade:
     command: /opt/python/run/venv/bin/pip install --upgrade pip
     ignoreErrors: false 
-  05_AddGlobalWSGIGroupAccess: 
+  AddGlobalWSGIGroupAccess: 
     command: "if ! grep -q 'WSGIApplicationGroup %{GLOBAL}' ../wsgi.conf ; then echo 'WSGIApplicationGroup %{GLOBAL}' >> ../wsgi.conf; fi;"

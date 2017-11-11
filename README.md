@@ -19,7 +19,7 @@ This application, built with Python Django, provides a web service that a user o
 Install required packages for local development:
 ```
   # Install from requirements file
-  pip install requirements_local.txt
+  pip install -r requirements_local.txt
 ```
 Fill in the required Django settings in  ```mooclet_engine_app/settings/secure.py``` based on the template files.
 
@@ -45,3 +45,5 @@ See AWS's guide to [Deploying a Django Application to Elastic Beanstalk](http://
 
 ## Usage
 See [this spreadsheet](https://docs.google.com/spreadsheets/d/1cmnQff9T7o2KhaccvdoLNj4v9lGaWpoxkPJ2nEUM_Ow) for a list of supported API endpoints and examples.
+
+Note that the API uses token authentication, as decribed in the Django REST Framework's [TokenAuthentication documentations](http://www.django-rest-framework.org/api-guide/authentication/#tokenauthentication)

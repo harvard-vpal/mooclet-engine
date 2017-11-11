@@ -1,24 +1,37 @@
 [
   {
     "model": "engine.policy",
-    "pk": 1,
+	"pk": 1,
     "fields": {
-      "name": "uniform_random"
-    }
-  },
-  {
-    "model": "engine.policy",
-    "pk": 2,
-    "fields": {
-      "name": "weighted_random"
-    }
-  },
+      "name": "uniform_random",
+	  "policy_id": 1
 
+    }
+  },
   {
     "model": "engine.policy",
-    "pk": 3,
+	"pk": 2,
     "fields": {
-      "name": "thompson_sampling"
+      "name": "weighted_random",
+	  "policy_id": 2
+
     }
+  },
+  {
+    "model": "engine.policy",
+	"pk": 3,
+    "fields": {
+      "name": "thompson_sampling",
+	  "policy_id": 3
+     }
+  },
+  {   
+    "model": "engine.policy",
+	"pk": 4,
+      "fields": {
+        "name": "agent_policy",
+		"policy_id": 4
+     }
+
   }
 ]  

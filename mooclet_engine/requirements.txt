@@ -5,3 +5,6 @@
 psycopg2
 django-storages
 boto
+scipy
+pandas
+sklearn

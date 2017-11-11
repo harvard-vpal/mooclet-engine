@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from django.apps import apps
 # from django.contrib.contenttypes.models import ContentType
 from django.db.models import Avg
+from mooclet_world import contextual_mab_policy
 
 # arguments to policies:
 
@@ -85,4 +86,5 @@ def thompson_sampling(variables,context):
 	return version_to_show
 
 
-
+def agent_policy(variables,context):
+	return contextual_mab_policy(variables,context)
