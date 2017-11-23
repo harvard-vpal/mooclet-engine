@@ -4,4 +4,4 @@
 # additional deployment requirements
 psycopg2
 django-storages
-boto
+boto3

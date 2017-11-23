@@ -42,7 +42,7 @@ path.append(SITE_ROOT)
 SECRET_KEY = secure.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = secure.ALLOWED_HOSTS[os.environ['ENV_TYPE']]
 
@@ -77,6 +77,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.common.BrokenLinkEmailsMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (

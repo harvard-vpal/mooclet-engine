@@ -20,6 +20,17 @@ AWS_STORAGE_BUCKET_NAME = secure.AWS_STORAGE_BUCKET_NAME
 AWS_S3_ACCESS_KEY_ID = secure.AWS_S3_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY = secure.AWS_SECRET_ACCESS_KEY
 
+# EMAIL settings
+EMAIL_HOST = secure.EMAIL_HOST
+EMAIL_PORT = secure.EMAIL_PORT
+EMAIL_USE_TLS = secure.EMAIL_USE_TLS
+EMAIL_HOST_USER = secure.EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = secure.EMAIL_HOST_PASSWORD
+
+ADMINS = secure.ADMINS
+MANAGERS = secure.MANAGERS
+SERVER_EMAIL = 'sam@sam'
+
 # Get environment-specific database settings from secure.py
 DATABASES = {
 	'default': secure.AWS_DATABASE[os.environ['ENV_TYPE']]
