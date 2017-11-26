@@ -8,3 +8,4 @@ boto
 scipy
 pandas
 sklearn
+numpy_indexed

@@ -4,13 +4,14 @@
 @author: Imanol
 """
 
-from email-mab/agents import *
+from email_mab.agents import *
 from django.core.urlresolvers import reverse
 from django.apps import apps
 # from django.contrib.contenttypes.models import ContentType
 from django.db.models import Avg
 import json
 import numpy as np
+import numpy_indexed as npi
 from numpy.random import choice, beta
 import pandas as pd
 import sys
@@ -21,8 +22,6 @@ import os
 
 
 def contextual_mab_policy(variables, context):
-
-
 
 
   versions = context['mooclet'].version_set.all()
@@ -72,8 +71,8 @@ def contextual_mab_policy(variables, context):
   # the possible values in case the variable is categorical.
   reward_history =   [var.value for var in Variables.objects.filter(name__in=world.response_variable)[0].get_data()]
   context_history = np.array(context_df)
-  arm_id_history = np.array(arm_df)
-
+  arm_id_history = npi.indices(world.arm_feature_vectors, np.array(arm_df), missing='mask').data
+  batch_id = len(arm_id_history)+1
 
 
   agent = getattr(sys.modules[__name__], agent_type)(world = world, horizon = 3000, batch_size = 1,
@@ -97,7 +96,7 @@ def contextual_mab_policy(variables, context):
   user_context = np.array(user_context_df)
 
 
-  version_id =  agent.policy(user_context)[0]
+  version_id =  agent.assign_arms_to_batch_of_contexts(user_context,batch_id)[0]
 
   version_names = world.get_arm_names(version_id)
 
@@ -140,7 +139,7 @@ class World:
 
     # variable information
     cwd = os.getcwd()
-    with open(os.path.join(cwd,'engine/email_mab/Data/var_info2.json'),'r') as fl:
+    with open(os.path.join(cwd,'engine/var_info.json'),'r') as fl:
       self.var_info = json.load(fl)
 
 
@@ -151,6 +150,7 @@ class World:
 
     self.initialize_arms()
     self.initilize_contexts()
+
 
 
   # Interface methods of agents with the world.
