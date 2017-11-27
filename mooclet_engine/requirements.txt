@@ -8,4 +8,5 @@ boto
 scipy
 pandas
 sklearn
-numpy_indexed
+pyyaml
+rpy2<=2.8.6

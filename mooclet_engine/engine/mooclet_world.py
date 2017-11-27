@@ -4,14 +4,13 @@
 @author: Imanol
 """
 
-from email_mab.agents import *
+from engine.email_mab.agents import *
 from django.core.urlresolvers import reverse
 from django.apps import apps
 # from django.contrib.contenttypes.models import ContentType
 from django.db.models import Avg
 import json
 import numpy as np
-import numpy_indexed as npi
 from numpy.random import choice, beta
 import pandas as pd
 import sys
@@ -71,7 +70,7 @@ def contextual_mab_policy(variables, context):
   # the possible values in case the variable is categorical.
   reward_history =   [var.value for var in Variables.objects.filter(name__in=world.response_variable)[0].get_data()]
   context_history = np.array(context_df)
-  arm_id_history = npi.indices(world.arm_feature_vectors, np.array(arm_df), missing='mask').data
+  arm_id_history = world.arm_id(np.array(arm_df))
   batch_id = len(arm_id_history)+1
 
 
@@ -155,6 +154,8 @@ class World:
 
   # Interface methods of agents with the world.
 
+  def arm_id(self,arm_feature_vector):
+    return np.argwhere((arm_feature_vector[:,None,:] == self.arm_feature_vectors).all(-1))[:,1]
 
   def arm_features(self, arm_id):
     return self.arm_feature_vectors[int(arm_id)]
