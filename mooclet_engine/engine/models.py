@@ -16,8 +16,8 @@ class Environment(models.Model):
 class Mooclet(models.Model):
     name = models.CharField(max_length=100,default='')
     policy = models.ForeignKey('Policy',blank=True,null=True)
-    environment = models.ForeignKey(Environment)
-    mooclet_id = models.PositiveIntegerField(blank=True)
+    environment = models.ForeignKey(Environment, blank=True, null=True, default=None)
+    mooclet_id = models.PositiveIntegerField(blank=True,null=True)
 
     class Meta:
         unique_together = ('environment','mooclet_id')
@@ -49,7 +49,7 @@ class Version(models.Model):
     name = models.CharField(max_length=200,default='')
     mooclet = models.ForeignKey(Mooclet)
     text = models.TextField(blank=True,default='')
-    version_id = models.PositiveIntegerField(blank=True)
+    version_id = models.PositiveIntegerField(blank=True,null=True)
     # mooclet_version_id = models.PositiveIntegerField(blank=True)
 
     # @property
@@ -68,21 +68,22 @@ class Version(models.Model):
 
 
 class Learner(models.Model):
-    name = models.CharField(max_length=100)
-    environment = models.ForeignKey(Environment)
-    learner_id = models.PositiveIntegerField(blank=True)
+    name = models.CharField(max_length=100,unique=True)
+    environment = models.ForeignKey(Environment,blank=True,null=True, default=None)
+    learner_id = models.PositiveIntegerField(blank=True,null=True)
 
-    class Meta:
-        unique_together = ('environment','learner_id')
+    # class Meta:
+        #unique_together = ('environment','learner_id')
 
 
 class Variable(models.Model):
-    name = models.CharField(max_length=100)
-    environment = models.ForeignKey(Environment)
-    variable_id = models.PositiveIntegerField(blank=True)
+    name = models.CharField(max_length=100, unique=True)
+    environment = models.ForeignKey(Environment,blank=True,null=True, default=None)
+    variable_id = models.PositiveIntegerField(blank=True,null=True)
 
     def __unicode__(self):
-        return "{} {}: {}".format(self.__class__.__name__, self.pk, self.name)
+        return self.name
+        #return "{} {}: {}".format(self.__class__.__name__, self.pk, self.name)
 
     def get_data(self,context=None):
         '''

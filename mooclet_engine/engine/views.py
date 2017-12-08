@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404
 class MoocletViewSet(viewsets.ModelViewSet):
     queryset = Mooclet.objects.all()
     serializer_class = MoocletSerializer
+    search_fields = ('name',)
 
     @detail_route()
     def test(self, request, pk=None):
@@ -19,30 +20,36 @@ class MoocletViewSet(viewsets.ModelViewSet):
         policy = request.GET.get('policy',None)
         context = {}
         if request.GET.get('user_id'):
-            context['learner'] = get_object_or_404(Learner, id=request.GET.get('user_id', None))
+            context['learner'] = get_object_or_404(Learner, name=request.GET.get('user_id', None))
         version = self.get_object().run(context=context)
         return Response(VersionSerializer(version).data)
 
 class VersionViewSet(viewsets.ModelViewSet):
     queryset = Version.objects.all()
     serializer_class = VersionSerializer
+    filter_fields = ('mooclet', 'mooclet__name',)
+    search_fields = ('name', 'mooclet__name',)
 
 class VariableViewSet(viewsets.ModelViewSet):
     queryset = Variable.objects.all()
     serializer_class = VariableSerializer
+    search_fields = ('name',)
 
 class ValueViewSet(viewsets.ModelViewSet):
     queryset = Value.objects.all()
     serializer_class = ValueSerializer
-    filter_fields = ('learner',)
+    filter_fields = ('learner', 'variable', 'learner__name', 'variable__name', 'mooclet', 'mooclet__name', 'version', 'version__name',)
+    search_fields = ('learner__name', 'variable__name',)
 
 class PolicyViewSet(viewsets.ModelViewSet):
     queryset = Policy.objects.all()
     serializer_class = PolicySerializer
+    search_fields = ('name',)
 
 class LearnerViewSet(viewsets.ModelViewSet):
     queryset = Learner.objects.all()
     serializer_class = LearnerSerializer
+    search_fields = ('name',)
 
 # class EnvironmentViewSet(viewsets.ModelViewSet):
 #     queryset = Environment.objects.all()

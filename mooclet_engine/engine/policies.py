@@ -51,25 +51,25 @@ def thompson_sampling(variables,context):
 
 		#get instructor conf and use for priors later
 		#add priors to db
-		prior_success_db, created = Variable.objects.get_or_create(name='thompson_prior_success')
-		prior_success_db_value = Value.objects.filter(variable=prior_success_db, version=version).last()
-		if prior_success_db_value:
-			#there is already a value, so update it
-			prior_success_db_value.value = prior_success
-			prior_success_db_value.save()
-		else:
-			#no db value
-			prior_success_db_value = Value.objects.create(variable=prior_success_db, version=version, value=prior_success)
+		# prior_success_db, created = Variable.objects.get_or_create(name='thompson_prior_success')
+		# prior_success_db_value = Value.objects.filter(variable=prior_success_db, version=version).last()
+		# if prior_success_db_value:
+		# 	#there is already a value, so update it
+		# 	prior_success_db_value.value = prior_success
+		# 	prior_success_db_value.save()
+		# else:
+		# 	#no db value
+		# 	prior_success_db_value = Value.objects.create(variable=prior_success_db, version=version, value=prior_success)
 
-		prior_failure_db, created = Variable.objects.get_or_create(name='thompson_prior_failure')
-		prior_failure_db_value = Value.objects.filter(variable=prior_failure_db, version=version).last()
-		if prior_failure_db_value:
-			#there is already a value, so update it
-			prior_failure_db_value.value = prior_failure
-			prior_failure_db_value.save()
-		else:
-			#no db value
-			prior_failure_db_value = Value.objects.create(variable=prior_failure_db, version=version, value=prior_failure)
+		# prior_failure_db, created = Variable.objects.get_or_create(name='thompson_prior_failure')
+		# prior_failure_db_value = Value.objects.filter(variable=prior_failure_db, version=version).last()
+		# if prior_failure_db_value:
+		# 	#there is already a value, so update it
+		# 	prior_failure_db_value.value = prior_failure
+		# 	prior_failure_db_value.save()
+		# else:
+		# 	#no db value
+		# 	prior_failure_db_value = Value.objects.create(variable=prior_failure_db, version=version, value=prior_failure)
 	
 
 		#TODO - log to db later?

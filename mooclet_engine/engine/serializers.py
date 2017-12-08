@@ -4,16 +4,16 @@ from .models import Mooclet, Version, Learner, Variable, Value, Policy
 class MoocletSerializer(serializers.ModelSerializer):
     class Meta:
         model = Mooclet
-        fields = ('id', 'environment','mooclet_id', 'name', 'policy')
+        fields = ('id', 'environment','mooclet_id', 'name', 'policy',)
 
 class VersionSerializer(serializers.ModelSerializer):
     # environment = serializers.ReadOnlyField()
-    mooclet = MoocletSerializer()
+    #mooclet = MoocletSerializer()
 
     class Meta:
         model = Version
         # exclude = ('id',)
-        fields = ('id', 'name','text','version_id','mooclet')
+        fields = ('id', 'name','text','version_id','mooclet',)
 
 class PolicySerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,9 +23,12 @@ class PolicySerializer(serializers.ModelSerializer):
 class VariableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Variable
-        fields = ('id', 'environment','variable_id','name')
+        fields = ('id', 'environment','variable_id','name',)
 
 class ValueSerializer(serializers.ModelSerializer):
+    # variable_name = serializers.RelatedField(source='Variable')
+    variable = serializers.SlugRelatedField(slug_field='name', queryset=Variable.objects.all())
+    learner = serializers.SlugRelatedField(slug_field='name', queryset=Learner.objects.all())
     class Meta:
         model = Value
         fields = ('id', 'variable','learner','mooclet','version','policy','value','text','timestamp')
