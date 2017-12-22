@@ -14,7 +14,7 @@ class Environment(models.Model):
 
 
 class Mooclet(models.Model):
-    name = models.CharField(max_length=100,default='')
+    name = models.CharField(max_length=100,default='', unique=True)
     policy = models.ForeignKey('Policy',blank=True,null=True)
     environment = models.ForeignKey(Environment, blank=True, null=True, default=None)
     mooclet_id = models.PositiveIntegerField(blank=True,null=True)
@@ -46,7 +46,7 @@ class Version(models.Model):
     Mooclet version
     '''
     
-    name = models.CharField(max_length=200,default='')
+    name = models.CharField(max_length=200,default='', unique=True)
     mooclet = models.ForeignKey(Mooclet)
     text = models.TextField(blank=True,default='')
     version_id = models.PositiveIntegerField(blank=True,null=True)
@@ -118,6 +118,13 @@ class Value(models.Model):
     value = models.FloatField(blank=True,null=True)
     text = models.TextField(blank=True,default='')
     timestamp = models.DateTimeField(null=True,auto_now=True)
+
+    class Meta:
+        indexes = [
+                    models.Index(fields=['mooclet', 'learner', 'version'], name='value_primary_idx'),
+                    models.Index(fields=['mooclet'], name='value_mooclet_idx'),
+                    models.Index(fields=['learner'], name='value_learner_idx')
+        ]
 
     # value_id = models.PositiveIntegerField(blank=True)
 

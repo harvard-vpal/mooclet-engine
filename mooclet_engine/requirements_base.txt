@@ -4,3 +4,4 @@ numpy>=1.10
 djangorestframework
 django-cors-middleware
 django-filter
+rest-pandas
