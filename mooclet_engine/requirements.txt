@@ -10,3 +10,4 @@ pandas
 sklearn
 pyyaml
 rpy2<=2.8.6
+boto3
