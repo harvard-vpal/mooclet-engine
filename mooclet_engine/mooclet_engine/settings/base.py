@@ -176,12 +176,18 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
 }
 
 #### cors headers ####
 
 # allow cross origin requests
 CORS_ORIGIN_ALLOW_ALL = True
+
+
+### versioning settings ###
+
+DEFAULT_VERSION = 'v1'
 
 
 #### custom application settings ####
