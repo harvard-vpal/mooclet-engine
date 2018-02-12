@@ -42,10 +42,10 @@ path.append(SITE_ROOT)
 SECRET_KEY = secure.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-#ALLOWED_HOSTS = secure.ALLOWED_HOSTS[os.environ['ENV_TYPE']]
-ALLOWED_HOSTS = ['mooclet-engine-dev.us-east-1.elasticbeanstalk.com','mooclet.causal-learning.com']
+ALLOWED_HOSTS = secure.ALLOWED_HOSTS[os.environ['ENV_TYPE']]
+#ALLOWED_HOSTS = [*]
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
