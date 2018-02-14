@@ -137,6 +137,7 @@ class World:
     self.context = context
 
     # variable information
+    #import pdb; pdb.set_trace()
     cwd = os.getcwd()
     with open(os.path.join(cwd,'engine/var_info.json'),'r') as fl:
       self.var_info = json.load(fl)
