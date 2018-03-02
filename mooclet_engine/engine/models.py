@@ -1,8 +1,8 @@
-from __future__ import unicode_literals
+
 from django.db import models
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
-import policies
+from . import policies 
 from django.http import Http404
 
 
@@ -96,7 +96,7 @@ class Variable(models.Model):
         '''
         return relevant values for the variable type, as a list of dicts
         '''
-        return self.get_data(context).values()
+        return list(self.get_data(context).values())
 
 
 class Value(models.Model):
@@ -153,7 +153,7 @@ class Policy(models.Model):
         try:
             return getattr(policies, self.name)
         except:
-            print "policy function matching specified name not found"
+            print("policy function matching specified name not found")
             # TODO look through custom user-provided functions
             return None
 

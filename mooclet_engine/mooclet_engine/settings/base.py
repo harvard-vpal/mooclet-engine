@@ -13,7 +13,7 @@ import os
 from os.path import abspath, basename, dirname, join, normpath
 from django.core.urlresolvers import reverse_lazy
 from sys import path
-import secure
+from . import secure
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 # BASE DIR refers to the directory containing manage.py
@@ -39,7 +39,7 @@ path.append(SITE_ROOT)
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = secure.SECRET_KEY
+#SECRET_KEY = .secure.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -153,9 +153,9 @@ STATICFILES_DIRS = (
 )
 
 #### django-bootstrap ####
-BOOTSTRAP3 = {
-    'include_jquery':True,
-}
+# BOOTSTRAP3 = {
+#     'include_jquery':True,
+# }
 
 #### DJANGO REST FRAMEWORK SETTINGS ####
 

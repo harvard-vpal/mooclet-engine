@@ -1,5 +1,5 @@
-from __future__ import unicode_literals
-import mooclet_api
+
+from . import mooclet_api
 
 from django.db import models
 

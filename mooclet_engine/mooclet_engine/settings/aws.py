@@ -6,7 +6,7 @@ Django settings for AWS deployment
 import os
 os.environ.setdefault('ENV_TYPE', 'test')
 from .base import *
-import secure
+from . import secure
 
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

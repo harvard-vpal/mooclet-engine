@@ -3,7 +3,7 @@ import os
 # os.environ.setdefault('ENV_TYPE', 'local')
 
 from .base import *
-import secure
+from .secure import *
 
 DEBUG = True
 
