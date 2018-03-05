@@ -5,6 +5,8 @@ djangorestframework
 django-cors-middleware
 django-filter
 rest-pandas
+
 coreapi
 pygments
 markdown
+

@@ -45,7 +45,7 @@ path.append(SITE_ROOT)
 DEBUG = False
 
 ALLOWED_HOSTS = secure.ALLOWED_HOSTS[os.environ['ENV_TYPE']]
-
+#ALLOWED_HOSTS = [*]
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -176,7 +176,9 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
+
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
+
 }
 
 #### cors headers ####

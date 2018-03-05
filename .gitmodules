@@ -1,0 +1,3 @@
+[submodule "mooclet_engine/engine/email-mab"]
+	path = mooclet_engine/engine/email-mab
+	url = https://github.com/mdimakopoulou/email-mab

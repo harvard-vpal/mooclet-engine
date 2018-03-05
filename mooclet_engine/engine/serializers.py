@@ -29,8 +29,10 @@ class ValueSerializer(serializers.ModelSerializer):
     # variable_name = serializers.RelatedField(source='Variable')
     variable = serializers.SlugRelatedField(slug_field='name', queryset=Variable.objects.all())
     learner = serializers.SlugRelatedField(slug_field='name', queryset=Learner.objects.all(), allow_null=True)
+
     #mooclet_name = serializers.SlugRelatedField(slug_field='name', queryset=Mooclet.objects.all(), allow_null=True)
     #version_name = serializers.SlugRelatedField(slug_field='name', queryset=Version.objects.all(), allow_null=True)
+
     class Meta:
         model = Value
         fields = ('id', 'variable','learner','mooclet','version','policy','value','text','timestamp',)

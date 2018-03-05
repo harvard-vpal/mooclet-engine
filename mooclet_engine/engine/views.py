@@ -5,7 +5,9 @@ from .serializers import *
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+
 import pandas as pd
+
 
 # rest framework viewsets
 
@@ -25,7 +27,9 @@ class MoocletViewSet(viewsets.ModelViewSet):
 
     queryset = Mooclet.objects.all()
     serializer_class = MoocletSerializer
+
     #lookup_field = 'name'
+
     search_fields = ('name',)
 
     @detail_route()
@@ -82,6 +86,7 @@ class VersionNameViewSet(viewsets.ModelViewSet):
     filter_fields = ('mooclet', 'mooclet__name',)
     search_fields = ('name', 'mooclet__name',)
 
+
 class VariableViewSet(viewsets.ModelViewSet):
     queryset = Variable.objects.all()
     #lookup_field = 'name'
@@ -107,12 +112,16 @@ class ValueViewSet(viewsets.ModelViewSet):
 class PolicyViewSet(viewsets.ModelViewSet):
     queryset = Policy.objects.all()
     serializer_class = PolicySerializer
+
     #lookup_field = 'name'
+
     search_fields = ('name',)
 
 class LearnerViewSet(viewsets.ModelViewSet):
     queryset = Learner.objects.all()
+
     #lookup_field = 'name'
+
     serializer_class = LearnerSerializer
     search_fields = ('name',)
 
@@ -130,6 +139,7 @@ class PandasLearnerValueViewSet(PandasView):
     search_fields = ('learner__name', 'variable__name',)
 
     def transform_dataframe(self, dataframe):
+
         data = dataframe
         data1= data.pivot_table(index='id', columns='variable')['value']
         data = pd.concat([data,data1],axis=1).set_index('learner')
@@ -141,6 +151,7 @@ class PandasLearnerValueViewSet(PandasView):
             data_transformed=data_transformed.rename(columns={f:list_[int(f)%len(list_)]+'_a'+str(int(f/len(list_))+1)})
             #dataframe.some_pivot_function(in_place=True)
         return data_transformed
+
 
 # class EnvironmentViewSet(viewsets.ModelViewSet):
 #     queryset = Environment.objects.all()
