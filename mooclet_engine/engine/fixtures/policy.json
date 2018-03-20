@@ -23,5 +23,14 @@
       "name": "thompson_sampling",
       "policy_id": 3
     }
+  },
+
+  {
+    "model": "engine.policy",
+    "pk": 5,
+    "fields": {
+      "name": "sample_without_replacement",
+      "policy_id": 5
+    }
   }
 ]  

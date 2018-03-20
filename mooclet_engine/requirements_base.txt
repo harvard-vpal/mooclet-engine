@@ -8,3 +8,4 @@ rest-pandas
 coreapi
 pygments
 markdown
+django-picklefield

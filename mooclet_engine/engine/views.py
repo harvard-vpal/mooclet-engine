@@ -39,8 +39,11 @@ class MoocletViewSet(viewsets.ModelViewSet):
         learner = None
         if request.GET.get('user_id', None):
             learner, created = Learner.objects.get_or_create(name=request.GET.get('user_id', None))
-            context['learner'] = learner
+        elif request.GET.get('learner', None):
+            learner, created = Learner.objects.get_or_create(name=request.GET.get('learner', None))
+        context['learner'] = learner
         version = self.get_object().run(context=context)
+        print version
         Version, created = Variable.objects.get_or_create(name='version')
         version_shown = Value( 
                             learner=learner,
@@ -149,3 +152,7 @@ class PandasLearnerValueViewSet(PandasView):
 # class UserViewSet(viewsets.ModelViewSet):
 #     queryset = User.objects.all()
 #     serializer_class = UserSerializer
+# class PolicyParametersViewSet(viewsets.ModelViewSet):
+#     queryset = PolicyParameters.objects.all()
+#     serializer_class = PolicyParametersSerializer
+#     filter_fields = ('mooclet', 'policy', 'parameters')
