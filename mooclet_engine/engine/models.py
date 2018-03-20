@@ -46,7 +46,7 @@ class Version(models.Model):
     Mooclet version
     '''
     
-    name = models.CharField(max_length=200,default='', unique=True)
+    name = models.CharField(max_length=200,default='')
     mooclet = models.ForeignKey(Mooclet)
     text = models.TextField(blank=True,default='')
     version_id = models.PositiveIntegerField(blank=True,null=True)
@@ -56,8 +56,8 @@ class Version(models.Model):
     # def environment(self):
     #     return self.mooclet.environment.pk
 
-    # class Meta:
-    #     unique_together = ('environment','version_id')
+    class Meta:
+        unique_together = ('mooclet','name')
 
     def __unicode__(self):
         return "{} {}: {}".format(self.__class__.__name__, self.pk, self.name)
