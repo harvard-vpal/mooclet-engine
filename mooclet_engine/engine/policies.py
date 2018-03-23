@@ -3,6 +3,10 @@ from django.core.urlresolvers import reverse
 from django.apps import apps
 # from django.contrib.contenttypes.models import ContentType
 from django.db.models import Avg
+import json
+from collections import Counter
+from .utils.utils import sample_no_replacement
+from django.db.models.query_utils import Q
 
 # arguments to policies:
 
@@ -85,4 +89,153 @@ def thompson_sampling(variables,context):
 	return version_to_show
 
 
+def sample_without_replacement(variables, context):
+	mooclet = context['mooclet']
+	policy_parameters = context['policy_parameters']
+	# print "parameters:"
+	# print policy_parameters
+	conditions = None
+	#print "starting"
+	previous_versions = None
+
+	Variable = apps.get_model('engine', 'Variable')
+	Value = apps.get_model('engine', 'Value')
+	Version = apps.get_model('engine', 'Version')
+
+	if policy_parameters:
+		# print "Has policy parameters"
+		policy_parameters = policy_parameters.parameters
+
+		if policy_parameters["type"] == "per-user" and context["learner"]:
+			# print "Per user and Has learner"
+			previous_versions = Version.objects.filter(value__variable__name="version", value__learner=context["learner"], mooclet=mooclet).all()
+			# previous_versions = Value.objects.filter(learner=context['learner'], mooclet=mooclet, 
+			# 					variable__name="version").values_list("version", flat=True)
+
+		if 'variables' in policy_parameters and previous_versions:
+			# print "previous versions " + str(len(previous_versions))
+			variables = policy_parameters['variables']
+			values = Value.objects.filter(version__in=previous_versions, variable__name__in=variables.keys()).select_related('variable','version').all()
+			value_list = []
+			for version in previous_versions:
+				# print list(values.filter(version=version).all().values())
+				value_list = value_list + list(values.filter(version=version).all().values("text","variable__name"))
+			# print value_list
+			conditions = {}
+			for variable in variables.keys():
+				#var_values = value_list.filter(variable__name=variable).values_list("text", flat=True)
+				var_values = list(filter(lambda x: x["variable__name"] == variable, value_list)) 
+				var_values = list(map(lambda x: x["text"], var_values)) 
+
+				conditions[variable] = sample_no_replacement(variables[variable], var_values)
+
+
+		elif 'variables' in policy_parameters:
+			# print "variables but no user or prior context"
+			#user hasn't seen versions previously
+			variables = policy_parameters['variables']
+			conditions = {}
+			for variable in variables.iteritems():
+				conditions[variable[0]] = choice(variable[1])
+
+		if conditions:
+			# print "conditions"
+			# print conditions
+			all_versions = mooclet.version_set.all()
+			correct_versions = all_versions
+
+			for condition in conditions:
+				correct_versions = correct_versions.all().filter(Q(value__variable__name=condition, value__text=conditions[condition]))
+
+			# print("All versions len:"+str(len(correct_versions.all())))
+			version = correct_versions.first()
+
+		else:
+			#no version features, do random w/o replace within the versions
+			# print "nothing"
+			all_versions = mooclet.version_set.all()#values_list("version", flat=True)
+			if not previous_versions:
+				previous_versions = Version.objects.filter(value__variable__name="version", mooclet=mooclet).all()
+			if previous_versions:
+				version = sample_no_replacement(all_versions, previous_versions)
+			else:
+				version = choice(all_versions)
+
+
+	else:
+		#no version features, do random w/o replace within the versions
+		# print "nothing"
+		all_versions = mooclet.version_set.all()#values_list("version", flat=True)
+		if not previous_versions:
+			previous_versions = Version.objects.filter(value__variable__name="version", mooclet=mooclet).all()#Value.objects.filter(mooclet=mooclet, variable__name="version").values_list("version", flat=True)
+		if previous_versions:
+			version = sample_no_replacement(all_versions, previous_versions)
+		else:
+			version = choice(all_versions)
+
+	return version
+
+
+
+
+def sample_without_replacement2(variables, context):
+	mooclet = context['mooclet']
+	policy_parameters = context['policy_parameters']
+	print "parameters:"
+	print policy_parameters
+	conditions = None
+	print "starting"
+	previous_versions = None
+	version = None
+
+	Variable = apps.get_model('engine', 'Variable')
+	Value = apps.get_model('engine', 'Value')
+	Version = apps.get_model('engine', 'Version')
+
+	if policy_parameters:
+		print "Has policy parameters"
+		policy_parameters = policy_parameters.parameters
+
+		if policy_parameters["type"] == "per-user" and context["learner"]:
+			print "Per user and Has learner"
+			#ALL versions
+			previous_versions = Version.objects.filter(value__variable__name="version", mooclet=mooclet).all()
+
+			previous_versions_user = previous_versions.filter(value__learner=context["learner"])
+
+			if bool(previous_versions_user):
+				print "has_previous_versions"
+				#if previous versions, return a new set of factors
+				all_versions = mooclet.version_set.all()
+				factor_names = policy_parameters["variables"].keys()
+				previous_version_factors = Value.objects.filter(variable__name__in=factor_names, version__in=previous_versions_user)
+
+				new_factors = all_versions.exclude(value__variable__name__in=factor_names, value__text__in=previous_version_factors.values_list('text',flat=True)).all()
+				version = choice(new_factors)
+				#pass
+
+			elif bool(previous_versions):
+				min_seen_version = None
+				min_seen_count = 0
+				#no previous versions for the given user
+				for version in previous_versions:
+					count = Value.objects.filter(variable__name="version", version=version).count()
+					if min_seen_version is None:
+						min_seen_version = version
+						min_seen_count = count
+					elif count < min_seen_count:
+						min_seen_version = version
+						min_seen_count = count
+				version = min_seen_version
+
+			else:
+				all_versions = mooclet.version_set.all()
+				version = choice(all_versions)
+				
+
+
+
+
+
+	return version
 

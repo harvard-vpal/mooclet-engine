@@ -1,9 +1,11 @@
 from __future__ import unicode_literals
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 import policies
 from django.http import Http404
+
 
 
 class Environment(models.Model):
@@ -165,9 +167,26 @@ class Policy(models.Model):
     def run_policy(self, context):
         # insert all version ids here?
         policy_function = self.get_policy_function()
+        policy_parameters = None
+
+        try:
+            policy_parameters = PolicyParameters.objects.get(mooclet=context['mooclet'], policy=self)
+            # print "params"
+            # print policy_parameters
+        except:
+            pass
+        context['policy_parameters'] = policy_parameters
         variables = self.get_variables()
         version_id = policy_function(variables,context)
         return version_id
 
-
+class PolicyParameters(models.Model):
+    mooclet = models.ForeignKey(Mooclet, null=True, blank=True, default=None)
+    policy = models.ForeignKey(Policy)
+    #make this a jsonfield
+    parameters = JSONField(null=True, blank=True)
+    #model = JSONField()
+    class Meta:
+        verbose_name_plural = 'policyparameters'
+        unique_together = ('mooclet', 'policy')
 
