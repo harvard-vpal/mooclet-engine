@@ -43,7 +43,7 @@ class MoocletViewSet(viewsets.ModelViewSet):
             learner, created = Learner.objects.get_or_create(name=request.GET.get('learner', None))
         context['learner'] = learner
         version = self.get_object().run(context=context)
-        print version
+        #print version
         Version, created = Variable.objects.get_or_create(name='version')
         version_shown = Value( 
                             learner=learner,

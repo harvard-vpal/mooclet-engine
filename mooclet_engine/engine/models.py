@@ -171,8 +171,8 @@ class Policy(models.Model):
 
         try:
             policy_parameters = PolicyParameters.objects.get(mooclet=context['mooclet'], policy=self)
-            print "params"
-            print policy_parameters
+            # print "params"
+            # print policy_parameters
         except:
             pass
         context['policy_parameters'] = policy_parameters
@@ -184,7 +184,8 @@ class PolicyParameters(models.Model):
     mooclet = models.ForeignKey(Mooclet, null=True, blank=True, default=None)
     policy = models.ForeignKey(Policy)
     #make this a jsonfield
-    parameters = JSONField()
+    parameters = JSONField(null=True, blank=True)
+    #model = JSONField()
     class Meta:
         verbose_name_plural = 'policyparameters'
         unique_together = ('mooclet', 'policy')
