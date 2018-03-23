@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 import policies
 from django.http import Http404
-from picklefield.fields import PickledObjectField
+
 
 
 class Environment(models.Model):
