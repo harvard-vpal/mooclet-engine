@@ -138,6 +138,13 @@ def sample_without_replacement(variables, context):
 			for variable in variables.iteritems():
 				conditions[variable[0]] = choice(variable[1])
 
+
+		# elif policy_parameters["type"] == "per-user" and context["learner"] and 'variables' not in policy_parameters:
+		# 	if previous_versions:
+		# 		version = sample_no_replacement(mooclet.version_set.all(), previous_versions)
+		# 	else:
+		# 		version = choice(context['mooclet'].version_set.all())
+
 		if conditions:
 			# print "conditions"
 			# print conditions
@@ -150,11 +157,14 @@ def sample_without_replacement(variables, context):
 			# print("All versions len:"+str(len(correct_versions.all())))
 			version = correct_versions.first()
 
+
+
 		else:
 			#no version features, do random w/o replace within the versions
 			# print "nothing"
 			all_versions = mooclet.version_set.all()#values_list("version", flat=True)
 			if not previous_versions:
+				print "no prev vers"
 				previous_versions = Version.objects.filter(value__variable__name="version", mooclet=mooclet).all()
 			if previous_versions:
 				version = sample_no_replacement(all_versions, previous_versions)
