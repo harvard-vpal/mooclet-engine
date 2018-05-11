@@ -13,7 +13,8 @@ class VersionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Version
         # exclude = ('id',)
-        fields = ('id', 'name','text','version_id','mooclet',)
+        version_json = serializers.JSONField(source='version_json')
+        fields = ('id', 'name','text','version_id','mooclet', 'version_json')
 
 class PolicySerializer(serializers.ModelSerializer):
     class Meta:

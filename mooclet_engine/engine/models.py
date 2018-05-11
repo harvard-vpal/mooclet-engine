@@ -53,6 +53,7 @@ class Version(models.Model):
     text = models.TextField(blank=True,default='')
     version_id = models.PositiveIntegerField(blank=True,null=True)
     # mooclet_version_id = models.PositiveIntegerField(blank=True)
+    version_json = JSONField(blank=True, null=True)
 
     # @property
     # def environment(self):
