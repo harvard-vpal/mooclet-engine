@@ -96,6 +96,7 @@ class ValueViewSet(viewsets.ModelViewSet):
     serializer_class = ValueSerializer
     filter_fields = ('learner', 'variable', 'learner__name', 'variable__name', 'mooclet', 'mooclet__name', 'version', 'version__name',)
     search_fields = ('learner__name', 'variable__name',)
+    ordering_fields = ('timestamp','learner', 'variable', 'learner__name', 'variable__name', 'mooclet', 'mooclet__name', 'version', 'version__name',)
 
     @list_route(methods=['POST'])
     def create_many(self, request, pk=None):
