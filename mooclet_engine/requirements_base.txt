@@ -5,6 +5,10 @@ djangorestframework
 django-cors-middleware
 django-filter
 rest-pandas
+sqlalchemy
 coreapi
 pygments
 markdown
+pycurl==7.43.0 --global-option="--with-nss"
+django-celery-results
+django-celery-beat
