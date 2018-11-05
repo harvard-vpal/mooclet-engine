@@ -14,6 +14,9 @@ http_static/
 __pycache__/
 *.py[cod]
 
+# local celery db
+*.db
+
 # local sqlite database
 *.sqlite3
 

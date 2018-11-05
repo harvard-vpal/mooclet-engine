@@ -1,8 +1,10 @@
+from __future__ import absolute_import, unicode_literals
 from celery import Celery
 from celery import shared_task
 import requests
 import pandas as pd
 from django.utils import timezone
+import tempfile
 import zipfile
 import os
 import StringIO
@@ -11,9 +13,9 @@ import hashlib
 try: import simplejson as json
 except ImportError: import json
 from mooclet_engine.settings.secure import QUALTRICS_API_TOKEN, QUALTRICS_DATA_CENTER, QUALTRICS_DEFAULT_FILE_FORMAT, ONTASK_API_USER, ONTASK_API_PW
-from models import *
+from .models import *
 from engine.models import *
-from utils import OnTask
+from .utils import OnTask
 
 
 @shared_task
@@ -72,16 +74,16 @@ def get_qualtrics_data(self, **kwargs):
 	requestDownload = requests.request("GET", requestDownloadUrl, headers=headers, stream=True)
 
 	# Step 4: Unziping file
-	with open("RequestFile.zip", "wb") as f:
+	temp_zip, temp_zip_path = tempfile.mkstemp()
+	with open(temp_zip_path, "w") as f:
 		for chunk in requestDownload.iter_content(chunk_size=1024):
 			f.write(chunk)
 
-	zipped = zipfile.ZipFile("RequestFile.zip")
+	zipped = zipfile.ZipFile(temp_zip_path)
 	zipinfo = zipped.infolist()
-	unzipped = zipped.extract(zipinfo[0])
-	print unzipped
-
-	with open(unzipped, 'r') as f:
+	#unzipped = StringIO.StringIO()
+	with zipped.open(zipinfo[0]) as f:
+	#with open(unzipped, 'r') as f:
 		survey_data = json.load(f)
 
 	print survey_data
@@ -111,8 +113,8 @@ def get_qualtrics_data(self, **kwargs):
 
 
 
-	os.remove("RequestFile.zip")
-	os.remove(unzipped)
+	os.remove(temp_zip_path)
+	#os.remove(unzipped)
 
 
 	last_export_date = timezone.now()
@@ -152,8 +154,13 @@ def update_workflow_data(self, **kwargs):
 		for data_exchange in data_exchanges:
 	 		mooclets = data_exchange.mooclets.all()
 	 		for mooclet in mooclets:
-	 			result_df[mooclet.name + "_version"], result_df[mooclet.name + "_text"] = result_df.apply(lambda x: run_version_if_none(x, mooclet), axis=1)
-
+	 			print "mooclet: " + mooclet.name
+	 			if mooclet.name + "_version" not in result_df:
+	 				result_df[mooclet.name + "_version"] = ""
+	 			if mooclet.name + "_text" not in result_df:
+	 				result_df[mooclet.name + "_text"] = ""
+	 			result_df[[mooclet.name + "_version", mooclet.name + "_text"]] = result_df.apply(lambda x: run_version_if_none(x, mooclet), axis=1)
+	 	print result_df
 
 
 	updated_workflow = workflow_object.update(result_df)
@@ -169,12 +176,19 @@ def run_version_if_none(row, mooclet):
 	if mooclet.name + '_version' not in row and mooclet.name + '_text' not in row:
 		print "no mooclet row"
 		version = mooclet.run(context={"learner":learner})
-		return version.name, version.text
+		version_info = {mooclet.name + "_version": version.name, mooclet.name + "_text": version.text}
+		
+		print version_info
+		version_info = pd.Series(version_info)
+		return version_info
 
 	elif not row[mooclet.name + "_version"] and not row[mooclet.name + "_text"]:
 		print "row but no values"
 		version = mooclet.run(context={"learner":learner})
-		return version.name, version.text
+		version_info = {mooclet.name + "_version": version.name, mooclet.name + "_text": version.text}
+		print version_info
+		version_info = pd.Series(version_info)
+		return version_info
 
 	else:
 		print "row and value"

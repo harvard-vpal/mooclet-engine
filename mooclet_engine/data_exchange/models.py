@@ -24,9 +24,15 @@ class QualtricsSurvey(models.Model):
 	last_survey_respondent = models.CharField(max_length=200, null=True, blank=True)
 	last_export_date = models.DateTimeField(null=True, blank=True) #update timestamp on save
 
+	def __unicode__(self):
+		return self.survey_id
+
 class OnTaskWorkflow(models.Model):
 	workflow_id = models.IntegerField()
 	url = models.URLField(max_length=2048, null=True, blank=True)
+
+	def __unicode__(self):
+		return str(self.workflow_id)
 
 class QualtricsOnTaskDataExchange(AbstractDataExchange):
 	data_input = models.ForeignKey('QualtricsSurvey')

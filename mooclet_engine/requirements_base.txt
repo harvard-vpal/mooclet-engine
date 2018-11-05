@@ -3,12 +3,13 @@ requests
 numpy>=1.10
 djangorestframework
 django-cors-middleware
-django-filter
+django-filter==1.1
 rest-pandas
 sqlalchemy
 coreapi
 pygments
 markdown
-pycurl==7.43.0 --global-option="--with-nss"
+pycurl==7.43.0 --install-option="--with-nss"
+celery[sqs]
 django-celery-results
 django-celery-beat

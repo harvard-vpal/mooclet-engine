@@ -199,7 +199,7 @@ DEFAULT_VERSION = 'v1'
 
 ### celery ###
 CELERY_RESULT_BACKEND = 'django-db'
-CELERY_RESULT_BACKEND = 'django-cache'
+#CELERY_RESULT_BACKEND = 'django-cache'
 
 
 
