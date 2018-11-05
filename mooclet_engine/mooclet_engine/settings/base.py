@@ -42,7 +42,7 @@ path.append(SITE_ROOT)
 SECRET_KEY = secure.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = secure.ALLOWED_HOSTS[os.environ['ENV_TYPE']]
 
@@ -60,13 +60,20 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
+     ## internal apps
+    'engine',
+    'data_exchange',
+
+    #celery
+    'celery',
+    'django_celery_results',
+    'django_celery_beat',
     # 'ordered_model',
     # 'bootstrap3',
     # 'django_bootstrap_breadcrumbs',
     # 'crispy_forms',
 
-    ## internal apps
-    'engine',
+   
     # 'text_mooclet',
 
 )
@@ -188,6 +195,15 @@ CORS_ORIGIN_ALLOW_ALL = True
 ### versioning settings ###
 
 DEFAULT_VERSION = 'v1'
+
+
+### celery ###
+CELERY_RESULT_BACKEND = 'django-db'
+#CELERY_RESULT_BACKEND = 'django-cache'
+
+
+
+CELERY_IMPORTS = ['engine', 'data_exchange.tasks']
 
 
 #### custom application settings ####

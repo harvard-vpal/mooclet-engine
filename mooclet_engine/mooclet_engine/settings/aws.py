@@ -5,6 +5,7 @@ Django settings for AWS deployment
 
 import os
 os.environ.setdefault('ENV_TYPE', 'test')
+# os.environ.setdefault('ENV_TYPE', 'celerytest')
 from .base import *
 import secure
 
@@ -35,3 +36,12 @@ SERVER_EMAIL = 'sam@sam'
 DATABASES = {
 	'default': secure.AWS_DATABASE[os.environ['ENV_TYPE']]
 }
+
+#celery
+CELERY_BROKER_URL = secure.AWS_CELERY_BROKER_URL
+CELERY_BROKER_TRANSPORT_OPTIONS = {"region": "ap-southeast-1",
+								   "polling_interval": 2,
+								   'queue_name_prefix': 'celery-',
+								   'visibility_timeout': 3600	
+								  }
+

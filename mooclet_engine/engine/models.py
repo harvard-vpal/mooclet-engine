@@ -17,12 +17,12 @@ class Environment(models.Model):
 
 class Mooclet(models.Model):
     name = models.CharField(max_length=100,default='', unique=True)
-    policy = models.ForeignKey('Policy',blank=True,null=True)
-    environment = models.ForeignKey(Environment, blank=True, null=True, default=None)
+    policy = models.ForeignKey('Policy',blank=True,null=True, on_delete=models.SET_NULL)
+    environment = models.ForeignKey(Environment, blank=True, null=True, default=None, on_delete=models.SET_NULL)
     mooclet_id = models.PositiveIntegerField(blank=True,null=True)
 
-    class Meta:
-        unique_together = ('environment','mooclet_id')
+    # class Meta:
+    #     unique_together = ('environment','mooclet_id')
 
     def __unicode__(self):
         return "{}: {}".format(self.__class__.__name__, self.name)
@@ -71,8 +71,8 @@ class Version(models.Model):
 
 
 class Learner(models.Model):
-    name = models.CharField(max_length=100,unique=True)
-    environment = models.ForeignKey(Environment,blank=True,null=True, default=None)
+    name = models.CharField(max_length=10000,unique=True)
+    environment = models.ForeignKey(Environment,blank=True,null=True, default=None, on_delete=models.SET_NULL)
     learner_id = models.PositiveIntegerField(blank=True,null=True)
 
     # class Meta:
@@ -81,7 +81,7 @@ class Learner(models.Model):
 
 class Variable(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    environment = models.ForeignKey(Environment,blank=True,null=True, default=None)
+    environment = models.ForeignKey(Environment,blank=True,null=True, default=None, on_delete=models.SET_NULL)
     variable_id = models.PositiveIntegerField(blank=True,null=True)
 
     def __unicode__(self):
@@ -113,10 +113,10 @@ class Value(models.Model):
     '''
     variable = models.ForeignKey(Variable)
 
-    learner = models.ForeignKey(Learner,null=True,blank=True)
-    mooclet = models.ForeignKey(Mooclet,null=True,blank=True)
-    version = models.ForeignKey(Version,null=True,blank=True)
-    policy = models.ForeignKey('Policy',null=True,blank=True)
+    learner = models.ForeignKey(Learner,null=True,blank=True, on_delete=models.SET_NULL)
+    mooclet = models.ForeignKey(Mooclet,null=True,blank=True, on_delete=models.SET_NULL)
+    version = models.ForeignKey(Version,null=True,blank=True, on_delete=models.SET_NULL)
+    policy = models.ForeignKey('Policy',null=True,blank=True, on_delete=models.SET_NULL)
 
     value = models.FloatField(blank=True,null=True)
     text = models.TextField(blank=True,default='')
@@ -141,7 +141,7 @@ class Value(models.Model):
 
 class Policy(models.Model):
     name = models.CharField(max_length=100)
-    environment = models.ForeignKey(Environment,null=True,blank=True,default=None)
+    environment = models.ForeignKey(Environment,null=True,blank=True,default=None, on_delete=models.SET_NULL)
     policy_id = models.PositiveIntegerField(blank=True)
     # variables = models.ManyToManyField('Variable') # might use this for persistent "state variables"?
 
