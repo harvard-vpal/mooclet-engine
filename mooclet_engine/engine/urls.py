@@ -11,9 +11,13 @@ router.register(r'value', views.ValueViewSet)
 router.register(r'policy', views.PolicyViewSet)
 router.register(r'learner', views.LearnerViewSet)
 # router.register(r'user', views.UserViewSet)
+#router.register(r'policyparameters', views.PolicyParametersViewSet)
+
+#for using name instead of pk
+router.register(r'version-name', views.VersionNameViewSet)
 
 urlpatterns = [
-	url(r'^api/v1/', include(router.urls, namespace='api')),
+	url(r'^api/v1/', include(router.urls, namespace='v1')),
 	url(r'^data', views.PandasValueViewSet.as_view()),
 	url(r'^learner-data', views.PandasLearnerValueViewSet.as_view())
 ]
