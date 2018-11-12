@@ -8,6 +8,8 @@ from collections import Counter
 from .utils.utils import sample_no_replacement
 from django.db.models.query_utils import Q
 
+import numpy as np
+from scipy.stats import invgamma
 # arguments to policies:
 
 # variables: list of variable objects, can be used to retrieve related data
@@ -248,4 +250,57 @@ def sample_without_replacement2(variables, context):
 
 
 	return version
+
+def thompson_sampling_contextual(variables, context):
+	'''
+	thompson sampling policy with contextual information.
+	Outcome is estimated using bayesian linear regression implemented by NIG conjugate priors.
+	'''
+
+	policy_parameters = context['policy_parameters']
+	parameters = policy_parameters.parameters
+	regression_formula = parameters['regression_formula']
+	#action space, assumed to be a json
+	action_space = parameters['action_space']
+	include_intercept = parameters['include_intercept']
+
+	#TODO: get current user context variables
+	contextual_vars = {}
+
+	#get current priors
+	mean = parameters['coef_mean']
+	cov = parameters['coef_cov']
+	variance_a = parameters['variance_a']
+	variance_b = parameters['variance_b']
+
+	#TODO: check dim of priors matches regression formula, e.g. dim of mean should equal to num of terms in formula
+
+	#sample coefficients according to priors
+	precesion_draw = invgamma.rvs(variance_a, 0, variance_b, size=1)
+	coef_draw = np.random.multivariate_normal(mean, precesion_draw * cov)
+	print coef_draw
+
+	#generate all possible action combinations
+	all_possible_actions = [{}]
+	for cur in action_space:
+		cur_options = action_space[cur]
+		new_possible = []
+		for a in all_possible_actions:
+			for cur_a in cur_options:
+				new_a = a.copy()
+				new_a[cur] = cur_a
+				new_possible.append(new_a)
+				all_possible_actions = new_possible
+
+	print all_possible_actions
+
+	#TODO: calculate outcome for each action and return the action with highest outcome
+	best_action = {}
+
+	#TODO: store best action to database
+
+	#TODO: convert best action into version
+	version_to_show = {}
+	return version_to_show
+
 
