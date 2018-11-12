@@ -1,6 +1,7 @@
 from numpy.random import choice
 from collections import Counter
-
+import pandas as pd
+import numpy as np
 
 def sample_no_replacement(full_set, previous_set=None):
 	# print "starting sample_no_replacement"
@@ -34,3 +35,43 @@ def sample_no_replacement(full_set, previous_set=None):
 		cond = choice(list(cond_choices))
 
 	return cond
+
+def create_design_matrix(input_df, formula, add_intercept = True):
+    '''
+    :param input_df:
+    :param formula: for eaxmple "y ~ x0 + x1 + x2 + x0 * x1 + x1 * x2"
+    :param add_intercept: whether to add dummy columns of 1.
+    :return: the design matrix as a dataframe, each row corresponds to a data point, and each column is a regressor in regression
+    '''
+
+    D_df = pd.DataFrame()
+    input_df = input_df.astype(np.float64)
+
+    # parse formula
+    formula = formula.strip()
+    all_vars_str = formula.split('~')[1].strip()
+    dependent_var = formula.split('~')[0].strip()
+    vars_list = all_vars_str.split('+')
+    vars_list = list(map(str.strip, vars_list))
+
+    ''''#sanity check to ensure each var used in
+    for var in vars_list:
+        if var not in input_df.columns:
+            raise Exception('variable {} not in the input dataframe'.format((var)))'''
+
+    # build design matrix
+    for var in vars_list:
+        if '*' in var:
+            interacting_vars = var.split('*')
+            interacting_vars = list(map(str.strip,interacting_vars))
+            D_df[var] = input_df[interacting_vars[0]]
+            for i in range(1, len(interacting_vars)):
+                D_df[var] *= input_df[interacting_vars[i]]
+        else:
+            D_df[var] = input_df[var]
+
+    # add dummy column for bias
+    if add_intercept:
+        D_df.insert(0, 'Intercept', 1.)
+
+    return D_df
