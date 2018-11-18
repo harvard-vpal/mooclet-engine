@@ -76,7 +76,7 @@ def thompson_sampling(variables,context):
 		# else:
 		# 	#no db value
 		# 	prior_failure_db_value = Value.objects.create(variable=prior_failure_db, version=version, value=prior_failure)
-	
+
 
 		#TODO - log to db later?
 		successes = (rating_average * rating_count) + prior_success
@@ -111,7 +111,7 @@ def sample_without_replacement(variables, context):
 		if policy_parameters["type"] == "per-user" and context["learner"]:
 			# print "Per user and Has learner"
 			previous_versions = Version.objects.filter(value__variable__name="version", value__learner=context["learner"], mooclet=mooclet).all()
-			# previous_versions = Value.objects.filter(learner=context['learner'], mooclet=mooclet, 
+			# previous_versions = Value.objects.filter(learner=context['learner'], mooclet=mooclet,
 			# 					variable__name="version").values_list("version", flat=True)
 
 		if 'variables' in policy_parameters and previous_versions:
@@ -126,8 +126,8 @@ def sample_without_replacement(variables, context):
 			conditions = {}
 			for variable in variables.keys():
 				#var_values = value_list.filter(variable__name=variable).values_list("text", flat=True)
-				var_values = list(filter(lambda x: x["variable__name"] == variable, value_list)) 
-				var_values = list(map(lambda x: x["text"], var_values)) 
+				var_values = list(filter(lambda x: x["variable__name"] == variable, value_list))
+				var_values = list(map(lambda x: x["text"], var_values))
 
 				conditions[variable] = sample_no_replacement(variables[variable], var_values)
 
@@ -243,13 +243,14 @@ def sample_without_replacement2(variables, context):
 			else:
 				all_versions = mooclet.version_set.all()
 				version = choice(all_versions)
-				
+
 
 
 
 
 
 	return version
+
 
 def thompson_sampling_contextual(variables, context):
 	'''
@@ -274,9 +275,8 @@ def thompson_sampling_contextual(variables, context):
 	#sample coefficients according to priors
 	precesion_draw = invgamma.rvs(variance_a, 0, variance_b, size=1)
 	coef_draw = np.random.multivariate_normal(mean, precesion_draw * cov)
-	print coef_draw
+	print('sampled coeffs: ' + str(coef_draw))
 
-	#TODO: prevent same category
 	#generate all possible action combinations
 	all_possible_actions = [{}]
 	for cur in action_space:
@@ -286,48 +286,74 @@ def thompson_sampling_contextual(variables, context):
 			for cur_a in cur_options:
 				new_a = a.copy()
 				new_a[cur] = cur_a
-				new_possible.append(new_a)
-				all_possible_actions = new_possible
+				if is_valid_action(new_a):
+					new_possible.append(new_a)
+					all_possible_actions = new_possible
 
 	print all_possible_actions
 
-	#TODO: calculate outcome for each action and return the action with highest outcome
-	best_action = {}
+	#calculate outcome for each action and find the best action
+	best_outcome = -np.inf
+	best_action = None
+	for action in all_possible_actions:
+		independent_vars = action.copy()
+		independent_vars.update(contextual_vars)
+		outcome = calculate_outcome(independent_vars,coef_draw, include_intercept, regression_formula)
+		if best_action is None or outcome > best_outcome:
+			best_outcome = outcome
+			best_action = action
+
+	print('best action: ' + str(best_action))
 
 	#TODO: convert best action into version
 	version_to_show = {}
 	return version_to_show
 
 def calculate_outcome(var_dict, coef_list, include_intercept, formula):
-    '''
-    :param var_dict: dict of all vars (actions + contextual) to their values
-    :param coef_list: coefficients for each term in regression
-    :param include_intercept: whether intercept is included
-    :param formula: regression formula
-    :return: outcome given formula, coefficients and variables values
-    '''
-    formula = formula.strip()
-    vars_list = list(map(str.strip, formula.split('~')[1].strip().split('+')))
-    if include_intercept:
-        vars_list.insert(0,1.)
+	'''
+	:param var_dict: dict of all vars (actions + contextual) to their values
+	:param coef_list: coefficients for each term in regression
+	:param include_intercept: whether intercept is included
+	:param formula: regression formula
+	:return: outcome given formula, coefficients and variables values
+	'''
+	formula = formula.strip()
+	vars_list = list(map(str.strip, formula.split('~')[1].strip().split('+')))
+	if include_intercept:
+		vars_list.insert(0,1.)
 
-    assert(len(vars_list) == len(coef_list))
+	assert(len(vars_list) == len(coef_list))
 
-    outcome = 0.
-    for var,coef in zip(vars_list,coef_list):
-        value = 1.
-        if type(var) != str:
-            value = 1.
-        elif '*' in var:
-            interacting_vars = var.split('*')
-            interacting_vars = list(map(str.strip,interacting_vars))
-            for i in range(0, len(interacting_vars)):
-                value *= var_dict[interacting_vars[i]]
-        else:
-            value = var_dict[var]
+	outcome = 0.
+	for var,coef in zip(vars_list,coef_list):
+		value = 1.
+		if type(var) != str:
+			value = 1.
+		elif '*' in var:
+			interacting_vars = var.split('*')
+			interacting_vars = list(map(str.strip,interacting_vars))
+			for i in range(0, len(interacting_vars)):
+				value *= var_dict[interacting_vars[i]]
+		else:
+			value = var_dict[var]
+		outcome += coef * value
 
-        print(coef, value)
-        outcome += coef * value
+	return outcome
 
-    print(outcome)
-    return outcome
+def is_valid_action(action):
+	'''
+	checks whether an action is valid, meaning, no more than one vars under same category are assigned 1
+	'''
+	keys = action.keys()
+	for cur_key in keys:
+		if '_' not in cur_key:
+			continue
+		value = 0
+		prefix = cur_key.rsplit('_',1)[0] + '_'
+		for key in keys:
+			if key.startswith(prefix):
+				value += action[key]
+		if value > 1:
+			return False
+
+	return True
