@@ -263,9 +263,7 @@ def thompson_sampling_contextual(variables, context):
 	#action space, assumed to be a json
 	action_space = parameters['action_space']
 	include_intercept = parameters['include_intercept']
-
-	#TODO: get current user context variables
-	contextual_vars = {}
+	contextual_vars = parameters['contextual_variables']
 
 	#get current priors
 	mean = parameters['coef_mean']
@@ -273,13 +271,12 @@ def thompson_sampling_contextual(variables, context):
 	variance_a = parameters['variance_a']
 	variance_b = parameters['variance_b']
 
-	#TODO: check dim of priors matches regression formula, e.g. dim of mean should equal to num of terms in formula
-
 	#sample coefficients according to priors
 	precesion_draw = invgamma.rvs(variance_a, 0, variance_b, size=1)
 	coef_draw = np.random.multivariate_normal(mean, precesion_draw * cov)
 	print coef_draw
 
+	#TODO: prevent same category
 	#generate all possible action combinations
 	all_possible_actions = [{}]
 	for cur in action_space:
@@ -297,10 +294,40 @@ def thompson_sampling_contextual(variables, context):
 	#TODO: calculate outcome for each action and return the action with highest outcome
 	best_action = {}
 
-	#TODO: store best action to database
-
 	#TODO: convert best action into version
 	version_to_show = {}
 	return version_to_show
 
+def calculate_outcome(var_dict, coef_list, include_intercept, formula):
+    '''
+    :param var_dict: dict of all vars (actions + contextual) to their values
+    :param coef_list: coefficients for each term in regression
+    :param include_intercept: whether intercept is included
+    :param formula: regression formula
+    :return: outcome given formula, coefficients and variables values
+    '''
+    formula = formula.strip()
+    vars_list = list(map(str.strip, formula.split('~')[1].strip().split('+')))
+    if include_intercept:
+        vars_list.insert(0,1.)
 
+    assert(len(vars_list) == len(coef_list))
+
+    outcome = 0.
+    for var,coef in zip(vars_list,coef_list):
+        value = 1.
+        if type(var) != str:
+            value = 1.
+        elif '*' in var:
+            interacting_vars = var.split('*')
+            interacting_vars = list(map(str.strip,interacting_vars))
+            for i in range(0, len(interacting_vars)):
+                value *= var_dict[interacting_vars[i]]
+        else:
+            value = var_dict[var]
+
+        print(coef, value)
+        outcome += coef * value
+
+    print(outcome)
+    return outcome
