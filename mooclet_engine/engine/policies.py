@@ -397,20 +397,31 @@ def calculate_outcome(var_dict, coef_list, include_intercept, formula):
 
 	return outcome
 
+# Check whether action is feasible (only one level of the action variables can be realized)
 def is_valid_action(action):
 	'''
 	checks whether an action is valid, meaning, no more than one vars under same category are assigned 1
 	'''
+  
+  # Obtain labels for each action
 	keys = action.keys()
+  
+  # Itterate over each action label
 	for cur_key in keys:
+    
+    # Find the action labels with multiple levels
 		if '_' not in cur_key:
 			continue
 		value = 0
 		prefix = cur_key.rsplit('_',1)[0] + '_'
+    
+    # Compute sum of action variable with multiple levels
 		for key in keys:
 			if key.startswith(prefix):
 				value += action[key]
+    # Action not feasible if sum of indicators is more than 1    
 		if value > 1:
 			return False
 
+  # Return true if action is valid
 	return True
