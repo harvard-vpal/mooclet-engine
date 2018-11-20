@@ -309,6 +309,8 @@ def thompson_sampling_contextual(variables, context):
 	version_to_show = {}
 	return version_to_show
 
+# Compute expected reward given context and action of user
+# Inputs: (design matrix row as dict, coeff. vector, intercept, reg. eqn.)
 def calculate_outcome(var_dict, coef_list, include_intercept, formula):
 	'''
 	:param var_dict: dict of all vars (actions + contextual) to their values
@@ -317,25 +319,46 @@ def calculate_outcome(var_dict, coef_list, include_intercept, formula):
 	:param formula: regression formula
 	:return: outcome given formula, coefficients and variables values
 	'''
+  	# Strip blank beginning and end space from equation
 	formula = formula.strip()
+  
+  	# Split RHS of equation into variable list (context, action, interactions)
 	vars_list = list(map(str.strip, formula.split('~')[1].strip().split('+')))
+  
+  	# Add 1 for intercept in variable list if specified
 	if include_intercept:
 		vars_list.insert(0,1.)
 
+ 	 # Raise assertion error if variable list different length then coeff list
 	assert(len(vars_list) == len(coef_list))
 
+  	# Initialize outcome
 	outcome = 0.
-	for var,coef in zip(vars_list,coef_list):
+  
+  	## Use variables and coeff list to compute expected reward
+  	# Itterate over all (var, coeff) pairs from regresion model
+	for var, coef in zip(vars_list,coef_list):
+    
+    		## Determine value in variable list
+    		# Initialize value (can change in loop)
 		value = 1.
+    		# Intercept has value 1
 		if type(var) != str:
 			value = 1.
+      
+    		# Interaction term value 
 		elif '*' in var:
 			interacting_vars = var.split('*')
 			interacting_vars = list(map(str.strip,interacting_vars))
+      			# Product of variable values in interaction term
 			for i in range(0, len(interacting_vars)):
 				value *= var_dict[interacting_vars[i]]
+        
+    		# Action or context value
 		else:
 			value = var_dict[var]
+      
+    		# Compute expected reward (hypothesized regression model)
 		outcome += coef * value
 
 	return outcome
