@@ -47,3 +47,31 @@ def test_thompson_sampling_contextual():
 test_thompson_sampling_contextual()
 #calculate_outcome({'x0':2.5,'x1':-.75,'a0':1.2}, [5.0,-2.0,3.2,1.5,-1.0], True,'y ~ x0 + x1 + a0 + a0 * x1')
 #print(is_valid_action({'matching_1':0,'char':3,'matching_0':1,'matching_2':0,'a_0':2,'a_2':0}))
+
+
+## Testing posterior draw function
+
+# Fill data frame (1 to 5 randomly)
+df = pd.DataFrame(np.random.randint(1,5,(samplesize,4)),columns = ['C2','C3','M', 'R'])
+
+# String formula
+formula = "y ~ C2 + C3 + M + R"
+
+# Generate outcome randomly 1 to 5
+outcome = np.random.randint(1,5,samplesize)
+
+# Create design matrix
+# Note: create_design_matrix in policies.py
+D = create_design_matrix(df, formula, add_intercept=True)
+design_multiple = np.column_stack((D["Intercept"], D["C2"], D["C3"], D["M"], D["R"]))
+
+# Prior parameters (mean vector, covariance matrix, shape and scale)
+# Note: regression parameter dim = 5 (constant, C2, C3, M, and R)
+m_pre = np.zeros(5)
+V_pre = np.identity(5)
+a1_pre = 2
+a2_pre = 2
+
+# Posterior draw given data (y,X) and parameters (mean, cov, a, b) 
+posteriors(outcome, design_multiple, m_pre, V_pre, a1_pre, a2_pre)
+
