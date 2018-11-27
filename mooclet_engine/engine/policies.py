@@ -425,3 +425,56 @@ def is_valid_action(action):
 
   	# Return true if action is valid
 	return True
+
+
+# Posteriors for beta and variance
+def posteriors(y, X, m_pre, V_pre, a1_pre, a2_pre):
+  
+  # Data size
+  datasize = len(y)
+  
+  # X transpose
+  Xtranspose = np.matrix.transpose(X)
+  
+  # Residuals
+  # (y - Xb) and (y - Xb)'
+  resid = np.subtract(y, np.dot(X,m_pre))
+  resid_trans = np.matrix.transpose(resid)
+  
+  # N x N middle term for gamma update
+  # (I + XVX')^{-1}
+  mid_term = np.linalg.inv(np.add(np.identity(datasize), np.dot(np.dot(X, V_pre),Xtranspose)))
+  
+  ## Update coeffecients priors
+  
+  # Update mean vector
+  # [(V^{-1} + X'X)^{-1}][V^{-1}mu + X'y]
+  m_post = np.dot(np.linalg.inv(np.add(np.linalg.inv(V_pre), np.dot(Xtranspose,X))), np.add(np.dot(np.linalg.inv(V_pre), m_pre), np.dot(Xtranspose,y)))
+  
+  # Update covariance matrix 
+  # (V^{-1} + X'X)^{-1}
+  V_post = np.linalg.inv(np.add(np.linalg.inv(V_pre), np.dot(Xtranspose,X)))
+  
+  ## Update precesion prior
+  
+  # Update gamma parameters
+  # a + n/2 (shape parameter)
+  a1_post = a1_pre + datasize/2
+  
+  # b + (1/2)(y - Xmu)'(I + XVX')^{-1}(y - Xmu) (scale parameter)
+  a2_post = a2_pre + (np.dot(np.dot(resid_trans, mid_term), resid))/2
+  
+  ## Posterior draws
+  
+  # Precesions from inverse gamma (shape, loc, scale, draws)
+  precesion_draw = invgamma.rvs(a1_post, 0, a2_post, size = 1)
+  
+  # Coeffecients from multivariate normal 
+  beta_draw = np.random.multivariate_normal(m_post, precesion_draw*V_post)
+  
+  # List with beta and s^2
+  beta_s2 = np.append(beta_draw, precesion_draw)
+
+  # Return posterior drawn parameters
+  # output: [(betas, s^2, a1, a2), V]
+  return [np.append(np.append(beta_s2, a1_post), a2_post), V_post]
