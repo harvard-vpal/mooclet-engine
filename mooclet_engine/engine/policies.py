@@ -8,6 +8,8 @@ from collections import Counter
 from .utils.utils import sample_no_replacement
 from django.db.models.query_utils import Q
 
+import numpy as np
+from scipy.stats import invgamma
 # arguments to policies:
 
 # variables: list of variable objects, can be used to retrieve related data
@@ -74,7 +76,7 @@ def thompson_sampling(variables,context):
 		# else:
 		# 	#no db value
 		# 	prior_failure_db_value = Value.objects.create(variable=prior_failure_db, version=version, value=prior_failure)
-	
+
 
 		#TODO - log to db later?
 		successes = (rating_average * rating_count) + prior_success
@@ -109,7 +111,7 @@ def sample_without_replacement(variables, context):
 		if policy_parameters["type"] == "per-user" and context["learner"]:
 			# print "Per user and Has learner"
 			previous_versions = Version.objects.filter(value__variable__name="version", value__learner=context["learner"], mooclet=mooclet).all()
-			# previous_versions = Value.objects.filter(learner=context['learner'], mooclet=mooclet, 
+			# previous_versions = Value.objects.filter(learner=context['learner'], mooclet=mooclet,
 			# 					variable__name="version").values_list("version", flat=True)
 
 		if 'variables' in policy_parameters and previous_versions:
@@ -124,8 +126,8 @@ def sample_without_replacement(variables, context):
 			conditions = {}
 			for variable in variables.keys():
 				#var_values = value_list.filter(variable__name=variable).values_list("text", flat=True)
-				var_values = list(filter(lambda x: x["variable__name"] == variable, value_list)) 
-				var_values = list(map(lambda x: x["text"], var_values)) 
+				var_values = list(filter(lambda x: x["variable__name"] == variable, value_list))
+				var_values = list(map(lambda x: x["text"], var_values))
 
 				conditions[variable] = sample_no_replacement(variables[variable], var_values)
 
@@ -241,7 +243,7 @@ def sample_without_replacement2(variables, context):
 			else:
 				all_versions = mooclet.version_set.all()
 				version = choice(all_versions)
-				
+
 
 
 
@@ -249,3 +251,230 @@ def sample_without_replacement2(variables, context):
 
 	return version
 
+
+# Draw thompson sample of (reg. coeff., variance) and also select the optimal action
+def thompson_sampling_contextual(variables, context):
+	'''
+	thompson sampling policy with contextual information.
+	Outcome is estimated using bayesian linear regression implemented by NIG conjugate priors.
+	'''
+
+  	# Store normal-inverse-gamma parameters
+	policy_parameters = context['policy_parameters']
+	parameters = policy_parameters.parameters
+  
+  	# Store regression equation string
+	regression_formula = parameters['regression_formula']
+  
+	# Action space, assumed to be a json
+	action_space = parameters['action_space']
+  
+  	# Include intercept can be true or false
+	include_intercept = parameters['include_intercept']
+  
+  	# Store contextual variables
+	contextual_vars = parameters['contextual_variables']
+
+	# Get current priors parameters (normal-inverse-gamma)
+	mean = parameters['coef_mean']
+	cov = parameters['coef_cov']
+	variance_a = parameters['variance_a']
+	variance_b = parameters['variance_b']
+
+  	# Draw variance of errors
+	precesion_draw = invgamma.rvs(variance_a, 0, variance_b, size=1)
+  
+  	# Draw regression coefficients according to priors
+	coef_draw = np.random.multivariate_normal(mean, precesion_draw * cov)
+	print('sampled coeffs: ' + str(coef_draw))
+
+	## Generate all possible action combinations
+  	# Initialize action set
+	all_possible_actions = [{}]
+  
+  	# Itterate over actions label names
+	for cur in action_space:
+    
+    		# Store set values corresponding to action labels
+		cur_options = action_space[cur]
+    
+    		# Initialize list of feasible actions
+		new_possible = []
+    
+    		# Itterate over action set
+		for a in all_possible_actions:
+      
+      			# Itterate over value sets correspdong to action labels
+			for cur_a in cur_options:
+				new_a = a.copy()
+				new_a[cur] = cur_a
+        
+        			# Check if action assignment is feasible
+				if is_valid_action(new_a):
+          
+          				# Append feasible action to list
+					new_possible.append(new_a)
+					all_possible_actions = new_possible
+
+  	# Print entire action set
+	print all_possible_actions
+
+	## Calculate outcome for each action and find the best action
+	best_outcome = -np.inf
+	best_action = None
+  
+  	# Itterate of all feasible actions
+	for action in all_possible_actions:
+		independent_vars = action.copy()
+		independent_vars.update(contextual_vars)
+    
+    		# Compute expected reward given action
+		outcome = calculate_outcome(independent_vars,coef_draw, include_intercept, regression_formula)
+    
+    		# Keep track of optimal (action, outcome)
+		if best_action is None or outcome > best_outcome:
+			best_outcome = outcome
+			best_action = action
+
+  	# Print optimal action
+	print('best action: ' + str(best_action))
+
+	#TODO: convert best action into version
+	version_to_show = {}
+	return version_to_show
+
+# Compute expected reward given context and action of user
+# Inputs: (design matrix row as dict, coeff. vector, intercept, reg. eqn.)
+def calculate_outcome(var_dict, coef_list, include_intercept, formula):
+	'''
+	:param var_dict: dict of all vars (actions + contextual) to their values
+	:param coef_list: coefficients for each term in regression
+	:param include_intercept: whether intercept is included
+	:param formula: regression formula
+	:return: outcome given formula, coefficients and variables values
+	'''
+  	# Strip blank beginning and end space from equation
+	formula = formula.strip()
+  
+  	# Split RHS of equation into variable list (context, action, interactions)
+	vars_list = list(map(str.strip, formula.split('~')[1].strip().split('+')))
+  
+  	# Add 1 for intercept in variable list if specified
+	if include_intercept:
+		vars_list.insert(0,1.)
+
+ 	 # Raise assertion error if variable list different length then coeff list
+	assert(len(vars_list) == len(coef_list))
+
+  	# Initialize outcome
+	outcome = 0.
+  
+  	## Use variables and coeff list to compute expected reward
+  	# Itterate over all (var, coeff) pairs from regresion model
+	for var, coef in zip(vars_list,coef_list):
+    
+    		## Determine value in variable list
+    		# Initialize value (can change in loop)
+		value = 1.
+    		# Intercept has value 1
+		if type(var) != str:
+			value = 1.
+      
+    		# Interaction term value 
+		elif '*' in var:
+			interacting_vars = var.split('*')
+			interacting_vars = list(map(str.strip,interacting_vars))
+      			# Product of variable values in interaction term
+			for i in range(0, len(interacting_vars)):
+				value *= var_dict[interacting_vars[i]]
+        
+    		# Action or context value
+		else:
+			value = var_dict[var]
+      
+    		# Compute expected reward (hypothesized regression model)
+		outcome += coef * value
+
+	return outcome
+
+# Check whether action is feasible (only one level of the action variables can be realized)
+def is_valid_action(action):
+	'''
+	checks whether an action is valid, meaning, no more than one vars under same category are assigned 1
+	'''
+  
+  	# Obtain labels for each action
+	keys = action.keys()
+  
+  	# Itterate over each action label
+	for cur_key in keys:
+    
+    		# Find the action labels with multiple levels
+		if '_' not in cur_key:
+			continue
+		value = 0
+		prefix = cur_key.rsplit('_',1)[0] + '_'
+    
+    		# Compute sum of action variable with multiple levels
+		for key in keys:
+			if key.startswith(prefix):
+				value += action[key]
+    		# Action not feasible if sum of indicators is more than 1    
+		if value > 1:
+			return False
+
+  	# Return true if action is valid
+	return True
+
+
+# Posteriors for beta and variance
+def posteriors(y, X, m_pre, V_pre, a1_pre, a2_pre):
+  
+  # Data size
+  datasize = len(y)
+  
+  # X transpose
+  Xtranspose = np.matrix.transpose(X)
+  
+  # Residuals
+  # (y - Xb) and (y - Xb)'
+  resid = np.subtract(y, np.dot(X,m_pre))
+  resid_trans = np.matrix.transpose(resid)
+  
+  # N x N middle term for gamma update
+  # (I + XVX')^{-1}
+  mid_term = np.linalg.inv(np.add(np.identity(datasize), np.dot(np.dot(X, V_pre),Xtranspose)))
+  
+  ## Update coeffecients priors
+  
+  # Update mean vector
+  # [(V^{-1} + X'X)^{-1}][V^{-1}mu + X'y]
+  m_post = np.dot(np.linalg.inv(np.add(np.linalg.inv(V_pre), np.dot(Xtranspose,X))), np.add(np.dot(np.linalg.inv(V_pre), m_pre), np.dot(Xtranspose,y)))
+  
+  # Update covariance matrix 
+  # (V^{-1} + X'X)^{-1}
+  V_post = np.linalg.inv(np.add(np.linalg.inv(V_pre), np.dot(Xtranspose,X)))
+  
+  ## Update precesion prior
+  
+  # Update gamma parameters
+  # a + n/2 (shape parameter)
+  a1_post = a1_pre + datasize/2
+  
+  # b + (1/2)(y - Xmu)'(I + XVX')^{-1}(y - Xmu) (scale parameter)
+  a2_post = a2_pre + (np.dot(np.dot(resid_trans, mid_term), resid))/2
+  
+  ## Posterior draws
+  
+  # Precesions from inverse gamma (shape, loc, scale, draws)
+  precesion_draw = invgamma.rvs(a1_post, 0, a2_post, size = 1)
+  
+  # Coeffecients from multivariate normal 
+  beta_draw = np.random.multivariate_normal(m_post, precesion_draw*V_post)
+  
+  # List with beta and s^2
+  beta_s2 = np.append(beta_draw, precesion_draw)
+
+  # Return posterior drawn parameters
+  # output: [(betas, s^2, a1, a2), V]
+  return [np.append(np.append(beta_s2, a1_post), a2_post), V_post]
