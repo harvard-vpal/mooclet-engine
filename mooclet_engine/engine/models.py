@@ -126,8 +126,10 @@ class Value(models.Model):
         indexes = [
                     models.Index(fields=['mooclet', 'learner', 'version'], name='value_primary_idx'),
                     models.Index(fields=['mooclet'], name='value_mooclet_idx'),
-                    models.Index(fields=['learner'], name='value_learner_idx')
+                    models.Index(fields=['learner'], name='value_learner_idx'),
+                    models.Index(fields=['learner','timestamp'], name='value_timestamp_idx')
         ]
+        ordering = ['learner', '-timestamp']
 
     # value_id = models.PositiveIntegerField(blank=True)
 
