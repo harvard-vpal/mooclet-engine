@@ -2,6 +2,7 @@ from numpy.random import choice
 from collections import Counter
 import pandas as pd
 import numpy as np
+from django.apps import apps
 
 def sample_no_replacement(full_set, previous_set=None):
 	# print "starting sample_no_replacement"
@@ -75,3 +76,48 @@ def create_design_matrix(input_df, formula, add_intercept = True):
         D_df.insert(0, 'Intercept', 1.)
 
     return D_df
+
+
+def values_to_df(mooclet, policyparams, latest_update=None):
+    """
+    where variables is a list of variable names
+    note: as implemented this will left join on users which can result in NAs
+    """
+    Value = apps.get_model('engine', 'Value')
+    variables = policyparams["contextual_variables"]
+    outcome = policyparams["outcome_variable"]
+    variables.append(outcome)
+    if not latest_update:
+        values = Value.objects.filter(variable__name__in=variables, mooclet=mooclet)
+    else: 
+        values = Value.objects.filter(variable__name__in=variables, mooclet=mooclet, timestamp__gte=latest_update)
+    vals_to_df = []
+    curr_user = None
+    #TODO: if the variable is "version" get the mapping to actions
+    for value in values:
+        if curr_user is None:
+            curr_user = value.learner.id
+            curr_user_values = {'user_id': curr_user}
+        if value.learner != curr_user:
+            #append to df
+            vals_to_df.append(pd.DataFrame.from_records(curr_user_values, index=[0]))
+            curr_user = value.learner.id
+            curr_user_values = {'user_id': curr_user}
+
+        #transform mooclet version shown into dummified action
+        if value.variable.name == 'version':
+                action_config = policyparams['actions']
+                #this is the numerical representation from the config
+                for action in action_config:
+                    curr_action_config = value.version.version_json[action]
+                    curr_user_values[action] = curr_action_config
+
+        else:
+            curr_user_values[value.variable.name] = value.value
+        print curr_user_values
+        vals_to_df.append(pd.DataFrame.from_records(curr_user_values, index=[0]))
+
+    output_df = pd.concat(vals_to_df)
+    output_df = output_df.dropna()
+    #print output_df.head()
+    return output_df

@@ -10,13 +10,17 @@ import os
 import StringIO
 import base64
 import hashlib
+import datetime
 try: import simplejson as json
 except ImportError: import json
 from mooclet_engine.settings.secure import QUALTRICS_API_TOKEN, QUALTRICS_DATA_CENTER, QUALTRICS_DEFAULT_FILE_FORMAT, ONTASK_API_USER, ONTASK_API_PW
 from .models import *
 from engine.models import *
 from .utils import OnTask
+from engine.utils.utils import *
+from engine.policies import *
 
+#write the new batch updating task
 
 @shared_task
 def get_qualtrics_data(self, **kwargs):
@@ -208,6 +212,40 @@ def hash_and_save(email, hashed=None):
 	learner,created = Learner.objects.get_or_create(name=user_hash)
 
 	return user_hash
+
+
+@shared_task
+def update_model(self, **kwargs):
+	Mooclet = Mooclet.objects.get(pk=kwargs["mooclet"])
+	Policy = Policy.objects.get(pk=kwargs["policy"])
+	Params = PolicyParameters.objects.get(mooclet=Mooclet, policy=Policy)
+	parameters = Params.parameters
+
+	regression_formula = parameters['regression_formula']
+	# Get current priors parameters (normal-inverse-gamma)
+	mean = parameters['coef_mean']
+	cov = parameters['coef_cov']
+	variance_a = parameters['variance_a']
+	variance_b = parameters['variance_b']
+	latest_update = Params.latest_update
+	values = values_to_df(Mooclet, Params, latest_update)
+	if not values.empty:
+		new_update_time = datetime.datetime.now()
+		Params.latest_update = new_update_time
+		Params.save()
+		rewards = pd.Series(values[parameters['reward_variable']])
+		values = values.drop(["user_id", parameters['reward_variable']], axis=1)
+		design_matrix = create_design_matrix(values, regression_formula)
+
+		posterior_vals = posteriors(reward, design_matrix, mean, cov, variance_a, variance_b)
+
+		Params.parameters['coef_mean'] = posterior_vals[0]
+		Params.parameters['coef_cov'] = posterior_vals[1]
+		Params.parameters['variance_a'] = posterior_vals[2]
+		Params.parameters['variance_b'] = posterior_vals[3]
+		Params.save()
+
+
 
 
 

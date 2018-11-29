@@ -12,3 +12,18 @@ def test_create_design_matrix():
     print(D.head())
 
 test_create_design_matrix()
+
+
+def test_get_values():
+    #variables = ['explanation', 'repdem']
+    policy_params = {
+                    "actions": {"matching": [0,1],
+                                "charity2": [0,1], 
+                                "charity3":[0,1]},
+                    "contexts": ['repdem', 'version']
+
+
+                    }
+    df = utils.values_to_df(16, policy_params)
+    print(df.head())
+test_get_values()

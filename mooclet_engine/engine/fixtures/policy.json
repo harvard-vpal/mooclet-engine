@@ -32,5 +32,14 @@
       "name": "sample_without_replacement",
       "policy_id": 5
     }
+  },
+
+  {
+    "model": "engine.policy",
+    "pk": 6,
+    "fields": {
+      "name": "thompson_sampling_contextual",
+      "policy_id": 6
+    }
   }
 ]  

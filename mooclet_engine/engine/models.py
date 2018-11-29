@@ -179,7 +179,7 @@ class Policy(models.Model):
         except:
             pass
         context['policy_parameters'] = policy_parameters
-        variables = self.get_variables()
+        #variables = self.get_variables()
         version_id = policy_function(variables,context)
         return version_id
 
@@ -188,6 +188,7 @@ class PolicyParameters(models.Model):
     policy = models.ForeignKey(Policy)
     #make this a jsonfield
     parameters = JSONField(null=True, blank=True)
+    latest_update = models.DateTimeField(null=True, blank=True)
     #model = JSONField()
     class Meta:
         verbose_name_plural = 'policyparameters'

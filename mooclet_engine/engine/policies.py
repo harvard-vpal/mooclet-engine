@@ -257,8 +257,13 @@ def thompson_sampling_contextual(variables, context):
 	'''
 	thompson sampling policy with contextual information.
 	Outcome is estimated using bayesian linear regression implemented by NIG conjugate priors.
+	map dict to version
+	get the current user's context as a dict
 	'''
 
+	Variable = apps.get_model('engine', 'Variable')
+	Value = apps.get_model('engine', 'Value')
+	Version = apps.get_model('engine', 'Version')
   	# Store normal-inverse-gamma parameters
 	policy_parameters = context['policy_parameters']
 	parameters = policy_parameters.parameters
@@ -274,6 +279,14 @@ def thompson_sampling_contextual(variables, context):
   
   	# Store contextual variables
 	contextual_vars = parameters['contextual_variables']
+	if 'learner' not in context:
+		pass
+	contextual_vars = Value.objects.filter(variable__name__in=contextual_vars, learner=context['learner'])
+	contextual_vars_dict = {}
+	for val in contextual_vars:
+		contextual_vars_dict[val.variable.name] = val.value
+	contextual_vars = contextual_vars_dict
+	print contextual_vars
 
 	# Get current priors parameters (normal-inverse-gamma)
 	mean = parameters['coef_mean']
@@ -338,9 +351,13 @@ def thompson_sampling_contextual(variables, context):
 
   	# Print optimal action
 	print('best action: ' + str(best_action))
+	version_to_show = Version.objects.filter(mooclet=context['mooclet'])
+
+	version_to_show = version_to_show.get(version_json__contains=best_action)
+
 
 	#TODO: convert best action into version
-	version_to_show = {}
+	#version_to_show = {}
 	return version_to_show
 
 # Compute expected reward given context and action of user
@@ -429,7 +446,12 @@ def is_valid_action(action):
 
 # Posteriors for beta and variance
 def posteriors(y, X, m_pre, V_pre, a1_pre, a2_pre):
-  
+  #y = list of uotcomes
+  #X = design matrix
+  #priors input by users, but if no input then default 
+  #m_pre vector 0 v_pre is an identity matrix - np.identity(size of params) a1 & a2 both 2. save the updates
+  #get the reward as a spearate vector. figure ut batch size issues (time based)
+
   # Data size
   datasize = len(y)
   
