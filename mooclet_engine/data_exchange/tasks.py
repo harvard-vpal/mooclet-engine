@@ -233,8 +233,8 @@ def update_model(self, **kwargs):
 		new_update_time = datetime.datetime.now()
 		Params.latest_update = new_update_time
 		Params.save()
-		rewards = pd.Series(values[parameters['reward_variable']])
-		values = values.drop(["user_id", parameters['reward_variable']], axis=1)
+		rewards = pd.Series(values[parameters['outcome_variable']])
+		values = values.drop(["user_id", parameters['outcome_variable']], axis=1)
 		design_matrix = create_design_matrix(values, regression_formula)
 
 		posterior_vals = posteriors(reward, design_matrix, mean, cov, variance_a, variance_b)
