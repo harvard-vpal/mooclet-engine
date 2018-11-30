@@ -1,8 +1,10 @@
+from __future__ import unicode_literals
 from numpy.random import choice
 from collections import Counter
 import pandas as pd
 import numpy as np
 from django.apps import apps
+import string
 
 def sample_no_replacement(full_set, previous_set=None):
 	# print "starting sample_no_replacement"
@@ -48,12 +50,13 @@ def create_design_matrix(input_df, formula, add_intercept = True):
     D_df = pd.DataFrame()
     input_df = input_df.astype(np.float64)
 
+    formula = str(formula)
     # parse formula
     formula = formula.strip()
     all_vars_str = formula.split('~')[1].strip()
     dependent_var = formula.split('~')[0].strip()
     vars_list = all_vars_str.split('+')
-    vars_list = list(map(str.strip, vars_list))
+    vars_list = list(map(string.strip, vars_list))
 
     ''''#sanity check to ensure each var used in
     for var in vars_list:
@@ -64,7 +67,7 @@ def create_design_matrix(input_df, formula, add_intercept = True):
     for var in vars_list:
         if '*' in var:
             interacting_vars = var.split('*')
-            interacting_vars = list(map(str.strip,interacting_vars))
+            interacting_vars = list(map(string.strip,interacting_vars))
             D_df[var] = input_df[interacting_vars[0]]
             for i in range(1, len(interacting_vars)):
                 D_df[var] *= input_df[interacting_vars[i]]
@@ -84,8 +87,8 @@ def values_to_df(mooclet, policyparams, latest_update=None):
     note: as implemented this will left join on users which can result in NAs
     """
     Value = apps.get_model('engine', 'Value')
-    variables = policyparams["contextual_variables"]
-    outcome = policyparams["outcome_variable"]
+    variables = policyparams.parameters["contextual_variables"]
+    outcome = policyparams.parameters["outcome_variable"]
     variables.append(outcome)
     if not latest_update:
         values = Value.objects.filter(variable__name__in=variables, mooclet=mooclet)
@@ -106,7 +109,7 @@ def values_to_df(mooclet, policyparams, latest_update=None):
 
         #transform mooclet version shown into dummified action
         if value.variable.name == 'version':
-                action_config = policyparams['actions']
+                action_config = policyparams.parameters['action_space']
                 #this is the numerical representation from the config
                 for action in action_config:
                     curr_action_config = value.version.version_json[action]
@@ -116,8 +119,11 @@ def values_to_df(mooclet, policyparams, latest_update=None):
             curr_user_values[value.variable.name] = value.value
         print curr_user_values
         vals_to_df.append(pd.DataFrame.from_records(curr_user_values, index=[0]))
-
-    output_df = pd.concat(vals_to_df)
-    output_df = output_df.dropna()
-    #print output_df.head()
+    print(vals_to_df)
+    if vals_to_df :
+        output_df = pd.concat(vals_to_df)
+        output_df = output_df.dropna()
+        #print output_df.head()
+    else:
+        output_df = pd.DataFrame()
     return output_df

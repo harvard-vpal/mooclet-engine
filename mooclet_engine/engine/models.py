@@ -180,6 +180,7 @@ class Policy(models.Model):
             pass
         context['policy_parameters'] = policy_parameters
         #variables = self.get_variables()
+        variables = []
         version_id = policy_function(variables,context)
         return version_id
 

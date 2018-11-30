@@ -1,3 +1,5 @@
+import string
+
 from numpy.random import choice, beta
 from django.core.urlresolvers import reverse
 from django.apps import apps
@@ -374,13 +376,15 @@ def calculate_outcome(var_dict, coef_list, include_intercept, formula):
 	formula = formula.strip()
   
   	# Split RHS of equation into variable list (context, action, interactions)
-	vars_list = list(map(str.strip, formula.split('~')[1].strip().split('+')))
+	vars_list = list(map(string.strip, formula.split('~')[1].strip().split('+')))
   
   	# Add 1 for intercept in variable list if specified
 	if include_intercept:
 		vars_list.insert(0,1.)
 
- 	 # Raise assertion error if variable list different length then coeff list
+ 	# Raise assertion error if variable list different length then coeff list
+ 	#print(vars_list)
+ 	#print(coef_list)
 	assert(len(vars_list) == len(coef_list))
 
   	# Initialize outcome
@@ -400,7 +404,7 @@ def calculate_outcome(var_dict, coef_list, include_intercept, formula):
     		# Interaction term value 
 		elif '*' in var:
 			interacting_vars = var.split('*')
-			interacting_vars = list(map(str.strip,interacting_vars))
+			interacting_vars = list(map(string.strip,interacting_vars))
       			# Product of variable values in interaction term
 			for i in range(0, len(interacting_vars)):
 				value *= var_dict[interacting_vars[i]]

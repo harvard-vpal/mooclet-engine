@@ -17,10 +17,10 @@ test_create_design_matrix()
 def test_get_values():
     #variables = ['explanation', 'repdem']
     policy_params = {
-                    "actions": {"matching": [0,1],
+                    "action_space": {"matching": [0,1],
                                 "charity2": [0,1], 
                                 "charity3":[0,1]},
-                    "contexts": ['repdem', 'version']
+                    "contextual_variables": ['repdem', 'version']
 
 
                     }

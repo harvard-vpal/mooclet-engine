@@ -216,10 +216,10 @@ def hash_and_save(email, hashed=None):
 
 @shared_task
 def update_model(self, **kwargs):
-	Mooclet = Mooclet.objects.get(pk=kwargs["mooclet"])
-	Policy = Policy.objects.get(pk=kwargs["policy"])
-	Params = PolicyParameters.objects.get(mooclet=Mooclet, policy=Policy)
-	parameters = Params.parameters
+	mooclet = Mooclet.objects.get(pk=kwargs["mooclet"])
+	policy = Policy.objects.get(pk=kwargs["policy"])
+	params = PolicyParameters.objects.get(mooclet=mooclet, policy=policy)
+	parameters = params.parameters
 
 	regression_formula = parameters['regression_formula']
 	# Get current priors parameters (normal-inverse-gamma)
@@ -227,23 +227,23 @@ def update_model(self, **kwargs):
 	cov = parameters['coef_cov']
 	variance_a = parameters['variance_a']
 	variance_b = parameters['variance_b']
-	latest_update = Params.latest_update
-	values = values_to_df(Mooclet, Params, latest_update)
+	latest_update = params.latest_update
+	values = values_to_df(mooclet, params, latest_update)
 	if not values.empty:
 		new_update_time = datetime.datetime.now()
-		Params.latest_update = new_update_time
-		Params.save()
+		params.latest_update = new_update_time
+		params.save()
 		rewards = pd.Series(values[parameters['outcome_variable']])
 		values = values.drop(["user_id", parameters['outcome_variable']], axis=1)
 		design_matrix = create_design_matrix(values, regression_formula)
 
 		posterior_vals = posteriors(reward, design_matrix, mean, cov, variance_a, variance_b)
 
-		Params.parameters['coef_mean'] = posterior_vals[0]
-		Params.parameters['coef_cov'] = posterior_vals[1]
-		Params.parameters['variance_a'] = posterior_vals[2]
-		Params.parameters['variance_b'] = posterior_vals[3]
-		Params.save()
+		params.parameters['coef_mean'] = posterior_vals[0]
+		params.parameters['coef_cov'] = posterior_vals[1]
+		params.parameters['variance_a'] = posterior_vals[2]
+		params.parameters['variance_b'] = posterior_vals[3]
+		params.save()
 
 
 
