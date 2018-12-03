@@ -13,14 +13,19 @@ def test_create_design_matrix():
 
 test_create_design_matrix()
 
+class PolicyParams():
+    parameters = {}
 
 def test_get_values():
+
     #variables = ['explanation', 'repdem']
-    policy_params = {
+    policy_params = PolicyParams()
+    policy_params.parameters = {
                     "action_space": {"matching": [0,1],
                                 "charity2": [0,1], 
                                 "charity3":[0,1]},
-                    "contextual_variables": ['repdem', 'version']
+                    "contextual_variables": ['repdem', 'version'],
+                    "outcome_variable": "score"
 
 
                     }

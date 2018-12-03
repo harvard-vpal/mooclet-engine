@@ -230,6 +230,7 @@ def update_model(self, **kwargs):
 	latest_update = params.latest_update
 	values = values_to_df(mooclet, params, latest_update)
 	if not values.empty:
+		print("has new values!")
 		new_update_time = datetime.datetime.now()
 		params.latest_update = new_update_time
 		params.save()
@@ -237,7 +238,7 @@ def update_model(self, **kwargs):
 		values = values.drop(["user_id", parameters['outcome_variable']], axis=1)
 		design_matrix = create_design_matrix(values, regression_formula)
 
-		posterior_vals = posteriors(reward, design_matrix, mean, cov, variance_a, variance_b)
+		posterior_vals = posteriors(rewards, design_matrix, mean, cov, variance_a, variance_b)
 
 		params.parameters['coef_mean'] = posterior_vals[0]
 		params.parameters['coef_cov'] = posterior_vals[1]

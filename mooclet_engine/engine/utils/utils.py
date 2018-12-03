@@ -94,16 +94,22 @@ def values_to_df(mooclet, policyparams, latest_update=None):
         values = Value.objects.filter(variable__name__in=variables, mooclet=mooclet)
     else: 
         values = Value.objects.filter(variable__name__in=variables, mooclet=mooclet, timestamp__gte=latest_update)
-    vals_to_df = []
+    variables.append('user_id')
+    variables.remove('version')
+    vals_to_df = pd.DataFrame({},columns=variables)
     curr_user = None
+    curr_user_values = {}
     #TODO: if the variable is "version" get the mapping to actions
     for value in values:
+        #skip any values with no learners
+        if not value.learner:
+            continue
         if curr_user is None:
             curr_user = value.learner.id
             curr_user_values = {'user_id': curr_user}
-        if value.learner != curr_user:
+        if value.learner.id != curr_user:
             #append to df
-            vals_to_df.append(pd.DataFrame.from_records(curr_user_values, index=[0]))
+            vals_to_df = vals_to_df.append(pd.Series(data=curr_user_values), ignore_index=True)
             curr_user = value.learner.id
             curr_user_values = {'user_id': curr_user}
 
@@ -118,12 +124,19 @@ def values_to_df(mooclet, policyparams, latest_update=None):
         else:
             curr_user_values[value.variable.name] = value.value
         print curr_user_values
-        vals_to_df.append(pd.DataFrame.from_records(curr_user_values, index=[0]))
+    if curr_user_values:
+        vals_to_df = vals_to_df.append(pd.Series(data=curr_user_values), ignore_index=True)
+    print("values df: ")
     print(vals_to_df)
-    if vals_to_df :
-        output_df = pd.concat(vals_to_df)
-        output_df = output_df.dropna()
-        #print output_df.head()
+    if not vals_to_df.empty:
+        output_df = vals_to_df.dropna()
     else:
-        output_df = pd.DataFrame()
+        output_df = vals_to_df
+    # if vals_to_df :
+    #     output_df = pd.concat(vals_to_df)
+    #     output_df = output_df.dropna()
+    #     #print output_df.head()
+    # else:
+    #     output_df = pd.DataFrame()
+    print(output_df)
     return output_df
