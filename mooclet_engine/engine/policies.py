@@ -288,14 +288,15 @@ def thompson_sampling_contextual(variables, context):
 	for val in contextual_vars:
 		contextual_vars_dict[val.variable.name] = val.value
 	contextual_vars = contextual_vars_dict
-	print contextual_vars
+	print('contextual vars: ' + str(contextual_vars))
 
 	# Get current priors parameters (normal-inverse-gamma)
 	mean = parameters['coef_mean']
 	cov = parameters['coef_cov']
 	variance_a = parameters['variance_a']
 	variance_b = parameters['variance_b']
-
+	print('prior mean: ' + str(mean))
+	print('prior cov: ' + str(cov))
   	# Draw variance of errors
 	precesion_draw = invgamma.rvs(variance_a, 0, variance_b, size=1)
   
@@ -332,21 +333,22 @@ def thompson_sampling_contextual(variables, context):
 					all_possible_actions = new_possible
 
   	# Print entire action set
-	print all_possible_actions
+	print('all possible actions: ' + str(all_possible_actions))
 
 	## Calculate outcome for each action and find the best action
 	best_outcome = -np.inf
 	best_action = None
   
+  	print('regression formula: ' + regression_formula)
   	# Itterate of all feasible actions
 	for action in all_possible_actions:
 		independent_vars = action.copy()
 		independent_vars.update(contextual_vars)
-    
-    		# Compute expected reward given action
+		print('independent vars: ' + str(independent_vars))
+		# Compute expected reward given action
 		outcome = calculate_outcome(independent_vars,coef_draw, include_intercept, regression_formula)
-    
-    		# Keep track of optimal (action, outcome)
+		print('outcome: ' + str(best_outcome))
+		# Keep track of optimal (action, outcome)
 		if best_action is None or outcome > best_outcome:
 			best_outcome = outcome
 			best_action = action
@@ -356,7 +358,6 @@ def thompson_sampling_contextual(variables, context):
 	version_to_show = Version.objects.filter(mooclet=context['mooclet'])
 
 	version_to_show = version_to_show.get(version_json__contains=best_action)
-
 
 	#TODO: convert best action into version
 	#version_to_show = {}
