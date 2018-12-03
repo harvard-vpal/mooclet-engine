@@ -347,6 +347,7 @@ def thompson_sampling_contextual(variables, context):
 		print('independent vars: ' + str(independent_vars))
 		# Compute expected reward given action
 		outcome = calculate_outcome(independent_vars,coef_draw, include_intercept, regression_formula)
+		print("curr_outcome" + str(outcome))
 		print('outcome: ' + str(best_outcome))
 		# Keep track of optimal (action, outcome)
 		if best_action is None or outcome > best_outcome:
@@ -378,6 +379,7 @@ def calculate_outcome(var_dict, coef_list, include_intercept, formula):
   
   	# Split RHS of equation into variable list (context, action, interactions)
 	vars_list = list(map(string.strip, formula.split('~')[1].strip().split('+')))
+
   
   	# Add 1 for intercept in variable list if specified
 	if include_intercept:
@@ -390,33 +392,53 @@ def calculate_outcome(var_dict, coef_list, include_intercept, formula):
 
   	# Initialize outcome
 	outcome = 0.
-  
+
+	dummy_loops = 0
+	for k in range(20):
+		dummy_loops += 1
+	print(dummy_loops)
+  	
+  	print(str(type(coef_list)))
+  	print(np.shape(coef_list))
+	coef_list = coef_list.tolist()
+	print("coef list length: " + str(len(coef_list)))
+	print("vars list length: " + str(len(vars_list)))
+  	print("vars_list " + str(vars_list))
+  	print("curr_coefs " + str(coef_list))
+
   	## Use variables and coeff list to compute expected reward
   	# Itterate over all (var, coeff) pairs from regresion model
-	for var, coef in zip(vars_list,coef_list):
-    
-    		## Determine value in variable list
-    		# Initialize value (can change in loop)
+  	num_loops = 0
+	for j in range(len(coef_list)): #var, coef in zip(vars_list,coef_list):
+		var = vars_list[j]
+		coef = coef_list[j]
+		## Determine value in variable list
+		# Initialize value (can change in loop)
 		value = 1.
-    		# Intercept has value 1
-		if type(var) != str:
+		# Intercept has value 1
+		if type(var) == float:
 			value = 1.
-      
-    		# Interaction term value 
+	  
+		# Interaction term value 
 		elif '*' in var:
 			interacting_vars = var.split('*')
 			interacting_vars = list(map(string.strip,interacting_vars))
-      			# Product of variable values in interaction term
+	  		# Product of variable values in interaction term
 			for i in range(0, len(interacting_vars)):
 				value *= var_dict[interacting_vars[i]]
-        
-    		# Action or context value
+	    
+		# Action or context value
 		else:
 			value = var_dict[var]
-      
-    		# Compute expected reward (hypothesized regression model)
+	  
+		# Compute expected reward (hypothesized regression model)
+		print("value " + str(value) )
+		print("coefficient " + str(coef))
 		outcome += coef * value
+		num_loops += 1
+		print("loop number: " + str(num_loops))
 
+	print("Number of loops: " + str(num_loops))
 	return outcome
 
 # Check whether action is feasible (only one level of the action variables can be realized)
