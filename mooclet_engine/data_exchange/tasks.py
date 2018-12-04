@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 from celery import Celery
 from celery import shared_task
 import requests
+import numpy as np
 import pandas as pd
 from django.utils import timezone
 import tempfile
@@ -229,21 +230,24 @@ def update_model(self, **kwargs):
 	variance_b = parameters['variance_b']
 	latest_update = params.latest_update
 	values = values_to_df(mooclet, params, latest_update)
+	
 	if not values.empty:
 		print("has new values!")
 		new_update_time = datetime.datetime.now()
 		params.latest_update = new_update_time
 		params.save()
-		rewards = pd.Series(values[parameters['outcome_variable']])
+		rewards = values[parameters['outcome_variable']]
 		values = values.drop(["user_id", parameters['outcome_variable']], axis=1)
+
 		design_matrix = create_design_matrix(values, regression_formula)
-
-		posterior_vals = posteriors(rewards, design_matrix, mean, cov, variance_a, variance_b)
-
-		params.parameters['coef_mean'] = posterior_vals[0]
-		params.parameters['coef_cov'] = posterior_vals[1]
-		params.parameters['variance_a'] = posterior_vals[2]
-		params.parameters['variance_b'] = posterior_vals[3]
+		numpy_design_matrix = design_matrix.values
+		numpy_rewards = rewards.values
+		posterior_vals = posteriors(numpy_rewards, numpy_design_matrix, mean, cov, variance_a, variance_b)
+		print("posteriors: " + str(posterior_vals))
+		params.parameters['coef_mean'] = posterior_vals["coef_mean"].tolist()
+		params.parameters['coef_cov'] = posterior_vals["coef_cov"].tolist()
+		params.parameters['variance_a'] = posterior_vals["variance_a"]
+		params.parameters['variance_b'] = posterior_vals["variance_b"]
 		params.save()
 
 

@@ -522,8 +522,13 @@ def posteriors(y, X, m_pre, V_pre, a1_pre, a2_pre):
   beta_draw = np.random.multivariate_normal(m_post, precesion_draw*V_post)
   
   # List with beta and s^2
-  beta_s2 = np.append(beta_draw, precesion_draw)
+  #beta_s2 = np.append(beta_draw, precesion_draw)
 
   # Return posterior drawn parameters
   # output: [(betas, s^2, a1, a2), V]
-  return [np.append(np.append(beta_s2, a1_post), a2_post), V_post]
+  return{"coef_mean": beta_draw, 
+  		"coef_cov": V_post,
+  		"variance_a": a1_post,
+  		"variance_b": a2_post}
+
+  #return [np.append(np.append(beta_s2, a1_post), a2_post), V_post]

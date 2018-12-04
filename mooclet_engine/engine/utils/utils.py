@@ -87,9 +87,11 @@ def values_to_df(mooclet, policyparams, latest_update=None):
     note: as implemented this will left join on users which can result in NAs
     """
     Value = apps.get_model('engine', 'Value')
-    variables = policyparams.parameters["contextual_variables"]
+    variables = list(policyparams.parameters["contextual_variables"])
     outcome = policyparams.parameters["outcome_variable"]
+    action_space = policyparams.parameters["action_space"]
     variables.append(outcome)
+    variables.extend(action_space.keys())
     if not latest_update:
         values = Value.objects.filter(variable__name__in=variables, mooclet=mooclet)
     else: 
@@ -107,9 +109,15 @@ def values_to_df(mooclet, policyparams, latest_update=None):
         if curr_user is None:
             curr_user = value.learner.id
             curr_user_values = {'user_id': curr_user}
+
         if value.learner.id != curr_user:
             #append to df
-            vals_to_df = vals_to_df.append(pd.Series(data=curr_user_values), ignore_index=True)
+            try:
+                vals_to_df = vals_to_df.append(curr_user_values, ignore_index=True)
+            except ValueError:
+                print("duplicate data")
+                print(curr_user_values)
+                pass
             curr_user = value.learner.id
             curr_user_values = {'user_id': curr_user}
 
@@ -124,8 +132,13 @@ def values_to_df(mooclet, policyparams, latest_update=None):
         else:
             curr_user_values[value.variable.name] = value.value
         print curr_user_values
-    if curr_user_values:
-        vals_to_df = vals_to_df.append(pd.Series(data=curr_user_values), ignore_index=True)
+    else:
+        try:
+            vals_to_df = vals_to_df.append(curr_user_values, ignore_index=True)
+        except ValueError:
+            print("duplicate data")
+            print(curr_user_values)
+            pass
     print("values df: ")
     print(vals_to_df)
     if not vals_to_df.empty:
