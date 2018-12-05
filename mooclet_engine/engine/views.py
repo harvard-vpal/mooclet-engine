@@ -108,6 +108,17 @@ class ValueViewSet(viewsets.ModelViewSet):
         else:
             return Response({'error':'invalid'})
 
+    @list_route(methods=['POST'])
+    def create_many_fromobj(self, request, pk=None):
+        queryset = Value.objects.all()
+        vals = request.data[request.data.keys()[0]]
+        serializer = ValueSerializer(many=True, data=vals)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        else:
+            return Response({'error':'invalid'})
+
 class PolicyViewSet(viewsets.ModelViewSet):
     queryset = Policy.objects.all()
     serializer_class = PolicySerializer
