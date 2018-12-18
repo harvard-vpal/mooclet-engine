@@ -51,8 +51,7 @@ class LearnerSerializer(serializers.ModelSerializer):
 #         model = User
 
 class PolicyParametersSerializer(serializers.ModelSerializer):
-    parameters = serializers.JSONField()
-
     class Meta:
         model = PolicyParameters
+        parameters = serializers.JSONField(source='parameters')
         fields = ('id', 'mooclet', 'policy', 'parameters')

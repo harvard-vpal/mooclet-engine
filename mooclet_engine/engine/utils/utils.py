@@ -91,13 +91,16 @@ def values_to_df(mooclet, policyparams, latest_update=None):
     outcome = policyparams.parameters["outcome_variable"]
     action_space = policyparams.parameters["action_space"]
     variables.append(outcome)
-    variables.extend(action_space.keys())
+
     if not latest_update:
         values = Value.objects.filter(variable__name__in=variables, mooclet=mooclet)
     else: 
         values = Value.objects.filter(variable__name__in=variables, mooclet=mooclet, timestamp__gte=latest_update)
+
+
     variables.append('user_id')
     variables.remove('version')
+    variables.extend(action_space.keys())
     vals_to_df = pd.DataFrame({},columns=variables)
     curr_user = None
     curr_user_values = {}
