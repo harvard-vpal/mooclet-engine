@@ -6,6 +6,7 @@ from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 import pandas as pd
+import json
 
 # rest framework viewsets
 
@@ -102,22 +103,29 @@ class ValueViewSet(viewsets.ModelViewSet):
     def create_many(self, request, pk=None):
         queryset = Value.objects.all()
         serializer = ValueSerializer(many=True, data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=201)
         else:
-            return Response({'error':'invalid'})
+            return Response({'error':'invalid'}, status=500)
 
     @list_route(methods=['POST'])
     def create_many_fromobj(self, request, pk=None):
         queryset = Value.objects.all()
+        print("Data:")
+        print(request.data)
+
         vals = request.data[request.data.keys()[0]]
+        try:
+            vals = json.loads(vals)
+        except:
+            pass
         serializer = ValueSerializer(many=True, data=vals)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=201)
         else:
-            return Response({'error':'invalid'})
+            return Response({'error':'invalid'}, status=500)
 
 class PolicyViewSet(viewsets.ModelViewSet):
     queryset = Policy.objects.all()
@@ -164,7 +172,8 @@ class PandasLearnerValueViewSet(PandasView):
 # class UserViewSet(viewsets.ModelViewSet):
 #     queryset = User.objects.all()
 #     serializer_class = UserSerializer
-# class PolicyParametersViewSet(viewsets.ModelViewSet):
-#     queryset = PolicyParameters.objects.all()
-#     serializer_class = PolicyParametersSerializer
-#     filter_fields = ('mooclet', 'policy', 'parameters')
+
+class PolicyParametersViewSet(viewsets.ModelViewSet):
+    queryset = PolicyParameters.objects.all()
+    serializer_class = PolicyParametersSerializer
+    filter_fields = ('mooclet', 'policy')

@@ -195,3 +195,6 @@ class PolicyParameters(models.Model):
         verbose_name_plural = 'policyparameters'
         unique_together = ('mooclet', 'policy')
 
+    def __unicode__(self):
+        return "{} {}".format(self.__class__.__name__, self.pk)
+
