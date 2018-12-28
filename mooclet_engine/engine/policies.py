@@ -526,7 +526,7 @@ def posteriors(y, X, m_pre, V_pre, a1_pre, a2_pre):
 
   # Return posterior drawn parameters
   # output: [(betas, s^2, a1, a2), V]
-  return{"coef_mean": beta_draw, 
+  return{"coef_mean": m_post, 
   		"coef_cov": V_post,
   		"variance_a": a1_post,
   		"variance_b": a2_post}
