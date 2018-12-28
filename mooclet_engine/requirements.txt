@@ -5,6 +5,6 @@
 psycopg2
 django-storages
 boto3
-supervisor
+#supervisor
 celery[sqs]==4.1.1
 django-celery-beat

@@ -10,7 +10,7 @@ coreapi
 pygments
 markdown
 pycurl==7.43.0 --install-option="--with-nss"
-celery[sqs]==4.1.1
+#celery[sqs]==4.1.1
 django-celery-results
-django-celery-beat
-scipy
+#django-celery-beat
+scipy==1.1.0
