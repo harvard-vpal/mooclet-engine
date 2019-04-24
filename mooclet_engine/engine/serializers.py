@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Mooclet, Version, Learner, Variable, Value, Policy, PolicyParameters
+from .models import Mooclet, Version, Learner, Variable, Value, Policy, PolicyParameters, PolicyParametersHistory
 
 class MoocletSerializer(serializers.ModelSerializer):
     class Meta:
@@ -36,6 +36,9 @@ class ValueSerializer(serializers.ModelSerializer):
         model = Value
         fields = ('id', 'variable','learner','mooclet','version','policy','value','text','timestamp',)
 
+    
+
+
 # class EnvironmentSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Environment
@@ -55,3 +58,9 @@ class PolicyParametersSerializer(serializers.ModelSerializer):
         model = PolicyParameters
         parameters = serializers.JSONField(source='parameters')
         fields = ('id', 'mooclet', 'policy', 'parameters')
+
+class PolicyParametersHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PolicyParametersHistory
+        parameters = serializers.JSONField(source='parameters')
+        fields = ('id', 'mooclet', 'policy', 'parameters', 'creation_time')

@@ -181,8 +181,12 @@ class Policy(models.Model):
         context['policy_parameters'] = policy_parameters
         #variables = self.get_variables()
         variables = []
-        version_id = policy_function(variables,context)
-        return version_id
+        try:
+            version = policy_function(variables,context)
+        except:
+            version = policies.uniform_random(variables, context)
+
+        return version
 
 class PolicyParameters(models.Model):
     mooclet = models.ForeignKey(Mooclet, null=True, blank=True, default=None)
@@ -197,4 +201,29 @@ class PolicyParameters(models.Model):
 
     def __unicode__(self):
         return "{} {}".format(self.__class__.__name__, self.pk)
+
+class PolicyParametersHistory(models.Model):
+    mooclet = models.ForeignKey(Mooclet, null=True, blank=True, default=None)
+    policy = models.ForeignKey(Policy)
+    #make this a jsonfield
+    parameters = JSONField(null=True, blank=True)
+    creation_time = models.DateTimeField(null=True, blank=True, auto_now_add=True)
+    #model = JSONField()
+    class Meta:
+        verbose_name_plural = 'policyparameterhistories'
+        ordering = ['creation_time']
+        #unique_together = ()
+
+    def __unicode__(self):
+        return "{} {}".format(self.__class__.__name__, self.pk)
+
+    @classmethod
+    def create_from_params(cls, params):
+        param_history = cls(mooclet=params.mooclet, 
+                                policy=params.policy,
+                                parameters=params.parameters,
+                                )
+        param_history.save()
+        return param_history
+
 

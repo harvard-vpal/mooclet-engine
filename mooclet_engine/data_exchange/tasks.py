@@ -233,6 +233,7 @@ def update_model(self, **kwargs):
 	
 	if not values.empty:
 		print("has new values!")
+		new_history = PolicyParametersHistory.create_from_params(params)
 		new_update_time = datetime.datetime.now()
 		params.latest_update = new_update_time
 		params.save()

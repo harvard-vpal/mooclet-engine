@@ -12,6 +12,7 @@ router.register(r'policy', views.PolicyViewSet)
 router.register(r'learner', views.LearnerViewSet)
 # router.register(r'user', views.UserViewSet)
 router.register(r'policyparameters', views.PolicyParametersViewSet)
+router.register(r'policyparametershistory', views.PolicyParametersHistoryViewSet)
 
 #for using name instead of pk
 router.register(r'version-name', views.VersionNameViewSet)
