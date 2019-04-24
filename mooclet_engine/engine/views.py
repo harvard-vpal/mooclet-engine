@@ -46,16 +46,26 @@ class MoocletViewSet(viewsets.ModelViewSet):
         version = self.get_object().run(context=context)
         #print version
         Version, created = Variable.objects.get_or_create(name='version')
+        #TODO: clean this up
+        if type(version) is dict:
+            version_id = version['id']
+            version_name = version['name']
+            serialized_version = version
+        else:
+            version_id = version.id
+            version_name = version.name
+            serialized_version = VersionSerializer(version).data
+
         version_shown = Value( 
                             learner=learner,
                             variable=Version,
                             mooclet=self.get_object(),
-                            version=version,
-                            value=version.id,
-                            text=version.name
+                            version_id=version_id,
+                            value=version_id,
+                            text=version_name
                             )
         version_shown.save()
-        return Response(VersionSerializer(version).data)
+        return Response(serialized_version)
 
 class VersionViewSet(viewsets.ModelViewSet):
     queryset = Version.objects.all()
@@ -176,4 +186,9 @@ class PandasLearnerValueViewSet(PandasView):
 class PolicyParametersViewSet(viewsets.ModelViewSet):
     queryset = PolicyParameters.objects.all()
     serializer_class = PolicyParametersSerializer
+    filter_fields = ('mooclet', 'policy')
+
+class PolicyParametersHistoryViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = PolicyParametersHistory.objects.all()
+    serializer_class = PolicyParametersHistorySerializer
     filter_fields = ('mooclet', 'policy')

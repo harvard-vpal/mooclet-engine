@@ -9,9 +9,10 @@ import json
 from collections import Counter
 from .utils.utils import sample_no_replacement
 from django.db.models.query_utils import Q
-
+import datetime
 import numpy as np
 from scipy.stats import invgamma
+from django.forms.models import model_to_dict
 # arguments to policies:
 
 # variables: list of variable objects, can be used to retrieve related data
@@ -20,6 +21,17 @@ from scipy.stats import invgamma
 
 def uniform_random(variables,context):
 	return choice(context['mooclet'].version_set.all())
+
+def uniform_random_time(variables,context):
+	version = choice(context['mooclet'].version_set.all())
+	version_dict = model_to_dict(version)
+	if version_dict['text'] != '':
+		dtnow = datetime.date.today()
+		dtiso = dtnow.isoformat()
+		version_dict['text'] = dtiso + ' ' + version_dict['text'] 
+	return version_dict
+
+
 
 def weighted_random(variables,context):
 	Weight = variables.get(name='version_weight')
