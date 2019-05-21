@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 import policies
 from django.http import Http404
+from django.utils import timezone
 
 
 
@@ -120,7 +121,7 @@ class Value(models.Model):
 
     value = models.FloatField(blank=True,null=True)
     text = models.TextField(blank=True,default='')
-    timestamp = models.DateTimeField(null=True,auto_now=True)
+    timestamp = models.DateTimeField(null=True,default=timezone.now)
 
     class Meta:
         indexes = [
