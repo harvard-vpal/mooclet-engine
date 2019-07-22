@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from drf_writable_nested import WritableNestedModelSerializer, UniqueFieldsMixin
 from .models import Mooclet, Version, Learner, Variable, Value, Policy, PolicyParameters, PolicyParametersHistory
 
 class MoocletSerializer(serializers.ModelSerializer):
@@ -21,13 +22,14 @@ class PolicySerializer(serializers.ModelSerializer):
         model = Policy
         fields = ('id', 'environment','name')
 
-class VariableSerializer(serializers.ModelSerializer):
+class VariableSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
     class Meta:
         model = Variable
         fields = ('id', 'environment','variable_id','name',)
 
-class ValueSerializer(serializers.ModelSerializer):
+class ValueSerializer(WritableNestedModelSerializer):
     # variable_name = serializers.RelatedField(source='Variable')
+    #variable = VariableSerializer(allow_null=False)
     variable = serializers.SlugRelatedField(slug_field='name', queryset=Variable.objects.all())
     learner = serializers.SlugRelatedField(slug_field='name', queryset=Learner.objects.all(), allow_null=True, required=False)
     #mooclet_name = serializers.SlugRelatedField(slug_field='name', queryset=Mooclet.objects.all(), allow_null=True)
@@ -36,7 +38,26 @@ class ValueSerializer(serializers.ModelSerializer):
         model = Value
         fields = ('id', 'variable','learner','mooclet','version','policy','value','text','timestamp',)
 
-    
+    # def validate_variable(self ,variable):
+    #     print "validating"
+    #     return variable
+
+    # def create(self, validated_data):
+    #     print "starting create"
+    #     var_name = validated_data.pop('variable')
+    #     var = Variable.objects.get_or_create(name=var_name)
+    #     var.save()
+    #     val = Value.objects.create(variable=var, **validated_data)
+    #     return val
+        # try:
+        #     var = Variable.objects.get(name=validated_data.name)
+        #     print "var exists"
+        #     return Value(**validated_data)
+        # except:
+        #     var = Variable.objects.create(name=validated_data.name)
+        #     var.save()
+        #     print "saved new var"
+        #     return Value(**validated_data)
 
 
 # class EnvironmentSerializer(serializers.ModelSerializer):

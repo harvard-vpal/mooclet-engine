@@ -93,7 +93,15 @@ class Variable(models.Model):
         '''
         return relevant value objects for the variable type
         '''
-        return self.value_set.all()
+        #assume if there is a context, it always contains a mooclet(?)
+        if context:
+            if 'mooclet' in context:
+                values = self.value_set.filter(version__in=context['mooclet'].version_set.all())
+                # if 'version' in context:
+                #     values = values.filter(version=context['version'])
+                return values
+        else:
+            return self.value_set.all()
 
 
     def get_data_dicts(self,context=None):
@@ -180,12 +188,10 @@ class Policy(models.Model):
         except:
             pass
         context['policy_parameters'] = policy_parameters
-        #variables = self.get_variables()
-        variables = []
-        try:
-            version = policy_function(variables,context)
-        except:
-            version = policies.uniform_random(variables, context)
+        variables = self.get_variables()
+        #variables = []
+        version = policy_function(variables,context)
+        #version = policies.uniform_random(variables, context)
 
         return version
 

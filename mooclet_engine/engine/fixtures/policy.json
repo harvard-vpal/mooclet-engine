@@ -41,5 +41,21 @@
       "name": "thompson_sampling_contextual",
       "policy_id": 6
     }
+  },
+    {
+    "model": "engine.policy",
+    "pk": 8,
+    "fields": {
+      "name": "uniform_random_time",
+      "policy_id": 99
+    }
+  },
+  {
+    "model": "engine.policy",
+    "pk": 9,
+    "fields": {
+      "name": "weighted_random_time",
+      "policy_id": 9
+    }
   }
 ]  

@@ -34,12 +34,30 @@ def uniform_random_time(variables,context):
 
 
 def weighted_random(variables,context):
+	Value = apps.get_model('engine', 'Value')
 	Weight = variables.get(name='version_weight')
-	weight_data = Weight.get_data(context)
-
+	weight_data = Value.objects.filter(variable=Weight, version__in=context['mooclet'].version_set.all())
 	versions = [weight.version for weight in weight_data]
 	weights = [weight.value for weight in weight_data]
 	return choice(versions, p=weights)
+	#print(version)
+
+
+
+def weighted_random_time(variables, context):
+	print("started_wrt")
+	Value = apps.get_model('engine', 'Value')
+	Weight = variables.get(name='version_weight')
+	weight_data = Value.objects.filter(variable=Weight, version__in=context['mooclet'].version_set.all())
+	versions = [weight.version for weight in weight_data]
+	weights = [weight.value for weight in weight_data]
+	version = choice(versions, p=weights)
+	version_dict = model_to_dict(version)
+	if version_dict['text'] != '':
+		dtnow = datetime.date.today()
+		dtiso = dtnow.isoformat()
+		version_dict['text'] = dtiso + ' ' + version_dict['text'] 
+	return version_dict
 
 def thompson_sampling_placeholder(variables,context):
 	return choice(context['mooclet'].version_set.all())
