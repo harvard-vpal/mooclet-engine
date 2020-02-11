@@ -1,4 +1,4 @@
-Django==1.11
+Django==1.11.28
 requests
 numpy>=1.10
 djangorestframework==3.8.2
