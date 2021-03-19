@@ -1,7 +1,7 @@
 Django==1.11
 requests
 numpy>=1.10
-djangorestframework==3.8.2
+djangorestframework==3.11.2
 django-cors-middleware
 django-filter==1.1
 rest-pandas
